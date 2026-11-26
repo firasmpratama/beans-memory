@@ -20,7 +20,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - name: Runner check
-        run: echo "runner ok: $(uname -a)"
+        run: uname -a
 
       - name: Checkout
         uses: actions/checkout@v4
