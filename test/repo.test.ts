@@ -60,7 +60,7 @@ describe("memory store", () => {
   });
 
   test("recent observations are ordered newest first", () => {
-    addObservation(db, { project, title: "Terbaru", body: "x", createdAt: "2026-11-26T10:00:00Z" });
+    addObservation(db, { project, title: "Terbaru", body: "x", createdAt: "2099-01-01T00:00:00Z" });
     const rows = recentObservations(db, project, 1);
     expect(rows[0].title).toBe("Terbaru");
   });
