@@ -16,16 +16,18 @@
   <rect x="1" y="1" width="790" height="428" rx="34" fill="#FDF7EA" stroke="#E8D7B8" stroke-width="2"/>
 
   <g transform="translate(236.00 22.00) scale(0.4)">
-    <ellipse cx="400" cy="486" rx="150" ry="16" fill="#8B5A2B" opacity="0.12"/>
-    <path d="M400 170 C312 170 246 234 243 320 C240 406 310 468 400 468 C492 468 560 406 558 320 C555 234 488 170 400 170Z"
-          fill="url(#bean)" stroke="#6E4420" stroke-width="7" stroke-linejoin="round"/>
-    <path d="M298 250 C278 282 270 316 274 350" fill="none" stroke="#FFF0CC" stroke-width="12" stroke-linecap="round" opacity="0.5"/>
-    <path d="M400 176 C398 146 408 120 428 100" fill="none" stroke="#6F8A4E" stroke-width="7" stroke-linecap="round"/>
-    <path d="M428 100 C452 84 482 88 492 108 C470 126 442 124 428 100Z" fill="url(#leaf)" stroke="#5C7440" stroke-width="5" stroke-linejoin="round"/>
-    <path d="M414 126 C396 112 370 116 360 136 C380 152 404 148 414 126Z" fill="url(#leaf)" stroke="#5C7440" stroke-width="5" stroke-linejoin="round"/>
-    <circle cx="340" cy="330" r="9" fill="#5B3A1E"/>
-    <circle cx="454" cy="330" r="9" fill="#5B3A1E"/>
-    <path d="M368 366 C386 382 416 382 434 366" fill="none" stroke="#5B3A1E" stroke-width="8" stroke-linecap="round"/>
+    <ellipse cx="400" cy="500" rx="140" ry="17" fill="#8B5A2B" opacity="0.12"/>
+    <path d="M430 138
+             C548 158 608 256 582 368
+             C560 462 478 510 396 500
+             C326 492 262 446 242 378
+             C232 346 243 322 268 317
+             C300 311 329 291 339 259
+             C352 214 380 163 430 138Z"
+          fill="url(#bean)" stroke="#5F3A1A" stroke-width="8" stroke-linejoin="round"/>
+    <path d="M260 336 C292 334 320 310 334 272" fill="none" stroke="#FFE8BC" stroke-width="11" stroke-linecap="round" opacity="0.85"/>
+    <path d="M262 340 C294 338 322 314 336 276" fill="none" stroke="#8A5A28" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+    <path d="M470 212 C452 250 446 300 452 350" fill="none" stroke="#FFF0CC" stroke-width="12" stroke-linecap="round" opacity="0.35"/>
   </g>
 
   <g transform="translate(55.75 360.00)" fill="#6E4420">
