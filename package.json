@@ -1,0 +1,7 @@
+{
+  "name": "agent-memory",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Local memory for OpenCode: SQLite + FTS5 plugin and MCP server"
+}

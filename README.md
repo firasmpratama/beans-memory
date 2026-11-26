@@ -1,0 +1,213 @@
+# agent-memory
+
+English | [Bahasa Indonesia](README.id.md)
+
+Local, persistent memory for [OpenCode](https://opencode.ai). No daemon, no cloud, no account. One SQLite file per machine.
+
+The agent can save notes while it works, search them later, and gets a small index injected at the start of each session.
+
+## How it works
+
+```
+OpenCode (Bun runtime)
+├── plugin  src/plugin.ts   hooks + memory_* tools, runs in-process
+├── MCP     src/mcp.ts      same tools over stdio, for other clients
+└── SQLite  ~/.local/share/agent-memory/memory.db
+              observations + FTS5 + prompts + sessions
+```
+
+- **Plugin** captures user prompts, records files touched by edit/write tools, and injects the 8 most recent note titles once per session.
+- **Tools** let the agent write and search durable notes. Summaries are written by the agent itself, so no extra model call and no background worker.
+- **MCP** exposes the same store to any MCP client (Claude Desktop, Cursor, scripts).
+- **Search** uses SQLite FTS5: AND first, OR as fallback, ranked with BM25.
+- Everything fails open. If the database or plugin breaks, OpenCode keeps working without memory.
+
+## Requirements
+
+- OpenCode 2
+- Bun 1.2+ only if you want the MCP server, the import scripts, or the tests. The plugin itself runs inside OpenCode's bundled Bun, so no install needed for normal use.
+  - `curl -fsSL https://bun.sh/install | bash`
+- macOS or Linux. Windows works in theory but is untested.
+
+## Install
+
+1. Get the code somewhere permanent:
+
+```bash
+git clone https://github.com/firasmpratama/agent-memory ~/tools/agent-memory
+cd ~/tools/agent-memory
+bun test   # optional, uses a temporary database
+```
+
+2. Create the OpenCode loader:
+
+```bash
+mkdir -p ~/.config/opencode/plugins/memory
+```
+
+`~/.config/opencode/plugins/memory/index.ts`:
+
+```ts
+import { pathToFileURL } from "node:url";
+
+const ENTRY = "/absolute/path/to/agent-memory/src/plugin.ts";
+
+const noop = {
+  id: "memory",
+  async setup() {
+    return () => {};
+  },
+};
+
+let plugin: unknown = noop;
+
+try {
+  const loaded = await import(pathToFileURL(ENTRY).href);
+  if (loaded?.default?.setup) plugin = loaded.default;
+} catch (error) {
+  console.error("[memory] plugin not loaded:", error);
+}
+
+export default plugin;
+```
+
+Replace `ENTRY` with the real path. Keep the fallback: if the code is on an external drive that is not mounted, OpenCode still starts with memory disabled instead of failing.
+
+3. Restart OpenCode.
+
+4. Verify. Ask the agent to call `memory_stats`. It should answer with zero notes on a fresh install.
+
+## Use
+
+Tools registered by the plugin:
+
+| Tool | Purpose |
+|---|---|
+| `memory_note` | Save a note: title, body, type, files, concepts |
+| `memory_search` | Full-text search, returns compact rows with ids |
+| `memory_get` | Full bodies by id |
+| `memory_stats` | Counts and last note date |
+
+Suggested workflow for the agent: call `memory_note` after a task that produced a decision, bugfix, or non-obvious wiring discovery. Search first with `memory_search`, then fetch only the rows you need with `memory_get`.
+
+Guided by `AGENTS.md`, the agent should keep notes short: what changed, why, and which files matter.
+
+## MCP server (optional)
+
+For clients that cannot load the plugin:
+
+```jsonc
+{
+  "mcp": {
+    "servers": {
+      "agent_memory": {
+        "type": "local",
+        "command": ["/absolute/path/to/bun", "/absolute/path/to/agent-memory/src/mcp.ts"]
+      }
+    }
+  }
+}
+```
+
+- The server speaks JSON-RPC over stdio, one message per line.
+- Tools: `memory_search`, `memory_get`, `memory_note`, `memory_stats`.
+- Database selection: `MEMORY_DB`, otherwise `~/.local/share/agent-memory/memory.db`.
+- Project name: `MEMORY_PROJECT`, otherwise the basename of the process working directory.
+
+Claude Desktop example:
+
+```json
+{
+  "mcpServers": {
+    "agent-memory": {
+      "command": "/absolute/path/to/bun",
+      "args": ["/absolute/path/to/agent-memory/src/mcp.ts"],
+      "env": { "MEMORY_DB": "/Users/you/.local/share/agent-memory/memory.db" }
+    }
+  }
+}
+```
+
+## Data
+
+Default location:
+
+```
+~/.local/share/agent-memory/memory.db
+```
+
+Override with `MEMORY_DB=/path/to/memory.db`. All projects share one file; the `project` column separates them. The project name comes from the basename of the working directory, so `~/work/api` is project `api`.
+
+Backup, with OpenCode closed:
+
+```bash
+cp ~/.local/share/agent-memory/memory.db ~/backup-memory.db
+```
+
+Or online:
+
+```bash
+sqlite3 ~/.local/share/agent-memory/memory.db ".backup '/path/to/copy.db'"
+```
+
+Reset: stop OpenCode, delete the file, start again. The schema is recreated empty.
+
+Timestamps are stored in UTC and displayed in local time.
+
+## Import from claude-mem (optional)
+
+If you have an old `~/.claude-mem/claude-mem.db`:
+
+```bash
+cd /path/to/agent-memory
+
+# observations; discovery-type rows are skipped by default
+bun src/import-claude-mem-db.ts --dry-run
+bun src/import-claude-mem-db.ts
+
+# session summaries and historical prompts
+bun src/import-claude-mem-extras.ts --dry-run
+bun src/import-claude-mem-extras.ts
+```
+
+Flags: `--source`, `--db`, `--project`, `--include-discovery`, `--dry-run`.
+
+To migrate a database created by an older version of this project:
+
+```bash
+bun src/migrate-legacy-db.ts --from /old/memory.db
+```
+
+## Security
+
+- Data stays on this machine. No network calls, no telemetry.
+- Notes are stored as written. There is no secret redaction. Do not save tokens, passwords, or `.env` contents into a note.
+- The database is readable by any process running as your user. Treat it like a notes file, not a vault.
+
+## Limitations
+
+- Keyword search only, no embeddings.
+- No automatic summarization. Notes exist only when the agent writes them.
+- Context injection is a short index (8 titles), not full bodies.
+- Single user, single machine. No sync.
+- SQLite is accessed by the plugin process and the MCP process. WAL mode plus a 5 second busy timeout handles that; heavy concurrent writes are not a design goal.
+
+## Layout
+
+```
+src/db.ts                   schema, FTS5, migrations
+src/repo.ts                 queries: sessions, prompts, observations, search
+src/plugin.ts               OpenCode plugin: hooks and tools
+src/mcp.ts                  MCP stdio server
+src/time.ts                 UTC to local formatting
+src/import-claude-mem-db.ts import observations from claude-mem
+src/import-claude-mem-extras.ts import summaries and prompts
+src/migrate-legacy-db.ts    copy an older agent-memory database
+test/repo.test.ts           bun test
+```
+
+## Uninstall
+
+1. Remove `~/.config/opencode/plugins/memory/`.
+2. Remove the `agent_memory` entry from `opencode.json` if you added it.
+3. Delete `~/.local/share/agent-memory/` if you do not want to keep the notes.
