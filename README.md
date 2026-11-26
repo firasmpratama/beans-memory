@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/peanut.svg" alt="Two golden beans joined by a center crease" width="360">
+  <img src="docs/peanut.svg" alt="A golden bean with a small green sprout" width="360">
 </p>
 
 <h1 align="center">beans-memory</h1>

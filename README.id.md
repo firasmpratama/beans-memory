@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/peanut.svg" alt="Dua biji emas menyatu dengan lekuk di tengah" width="360">
+  <img src="docs/peanut.svg" alt="Biji emas dengan tunas hijau kecil" width="360">
 </p>
 
 <h1 align="center">beans-memory</h1>

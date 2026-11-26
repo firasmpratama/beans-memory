@@ -1,42 +1,65 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600" role="img" aria-labelledby="t d">
   <title id="t">beans-memory</title>
-  <desc id="d">Two golden beans joined by a clean center crease.</desc>
+  <desc id="d">A golden bean with a small green sprout.</desc>
   <defs>
-    <linearGradient id="bean-gold-a" x1="0" y1="0" x2="0.18" y2="1">
-      <stop offset="0" stop-color="#FBE0A8"/>
-      <stop offset="0.68" stop-color="#EDBE72"/>
-      <stop offset="1" stop-color="#CF9848"/>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FDF7EA"/>
+      <stop offset="1" stop-color="#F2E3C9"/>
     </linearGradient>
-    <filter id="ground-soft-a" x="-40%" y="-250%" width="180%" height="600%">
-      <feGaussianBlur stdDeviation="11"/>
+    <linearGradient id="bean" x1="0" y1="0" x2="0.4" y2="1">
+      <stop offset="0" stop-color="#FBE0A8"/>
+      <stop offset="0.62" stop-color="#EDBE72"/>
+      <stop offset="1" stop-color="#C98F41"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#A9C286"/>
+      <stop offset="1" stop-color="#7E9B5C"/>
+    </linearGradient>
+    <filter id="shadow" x="-40%" y="-40%" width="180%" height="180%">
+      <feDropShadow dx="0" dy="18" stdDeviation="20" flood-color="#6E4420" flood-opacity="0.16"/>
     </filter>
   </defs>
 
-  <rect width="800" height="600" fill="#FDF7EA"/>
-  <ellipse cx="400" cy="448" rx="218" ry="17" fill="#6E4420" opacity="0.16" filter="url(#ground-soft-a)"/>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <ellipse cx="400" cy="480" rx="168" ry="20" fill="#8B5A2B" opacity="0.13"/>
 
-  <path
-    d="M400 183
-       C359 153 302 151 254 172
-       C195 198 160 249 160 309
-       C160 374 208 422 270 432
-       C327 441 374 407 400 365
-       C426 407 473 441 530 432
-       C592 422 640 374 640 309
-       C640 249 605 198 546 172
-       C498 151 441 153 400 183Z"
-    fill="url(#bean-gold-a)"
-    stroke="#6E4420"
-    stroke-width="6"
-    stroke-linejoin="round"
-  />
+  <g filter="url(#shadow)">
+    <path
+      d="M400 170
+         C312 170 246 234 243 320
+         C240 406 310 468 400 468
+         C492 468 560 406 558 320
+         C555 234 488 170 400 170Z"
+      fill="url(#bean)"
+      stroke="#6E4420"
+      stroke-width="7"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M298 250 C278 282 270 316 274 350"
+      fill="none"
+      stroke="#FFF0CC"
+      stroke-width="12"
+      stroke-linecap="round"
+      opacity="0.5"
+    />
+  </g>
 
-  <path
-    d="M400 194 C390 248 410 307 400 364"
-    fill="none"
-    stroke="#6E4420"
-    stroke-width="8"
-    stroke-linecap="round"
-    opacity="0.68"
-  />
+  <g filter="url(#shadow)">
+    <path d="M400 176 C398 146 408 120 428 100" fill="none" stroke="#6F8A4E" stroke-width="7" stroke-linecap="round"/>
+    <path
+      d="M428 100 C452 84 482 88 492 108 C470 126 442 124 428 100Z"
+      fill="url(#leaf)"
+      stroke="#5C7440"
+      stroke-width="5"
+      stroke-linejoin="round"
+    />
+    <path
+      d="M414 126 C396 112 370 116 360 136 C380 152 404 148 414 126Z"
+      fill="url(#leaf)"
+      stroke="#5C7440"
+      stroke-width="5"
+      stroke-linejoin="round"
+    />
+  </g>
 </svg>
