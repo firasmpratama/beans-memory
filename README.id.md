@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/peanut.svg" alt="Kacang yang baru dibuka, kulitnya terbuka" width="360">
+  <img src="docs/peanut.svg" alt="Dua biji emas menyatu dengan lekuk di tengah" width="360">
 </p>
 
 <h1 align="center">beans-memory</h1>
@@ -37,7 +37,24 @@ OpenCode (runtime Bun)
   - `curl -fsSL https://bun.sh/install | bash`
 - macOS atau Linux. Windows secara teori bisa, belum diuji.
 
-## Instalasi
+## Mulai cepat
+
+```bash
+git clone https://github.com/firasmpratama/beans-memory ~/tools/beans-memory
+cd ~/tools/beans-memory
+./install.sh
+```
+
+Restart OpenCode, lalu minta agent memanggil `memory_stats`. Di instalasi baru hasilnya nol catatan.
+
+Script memasang loader plugin, membuat launcher CLI `beans-memory` kalau Bun tersedia, dan menyalin skill. Script tidak mengubah `opencode.json` dan tidak menyalakan service.
+
+Tidak punya git? Unduh arsip source dari halaman Releases, ekstrak di lokasi permanen, lalu jalankan `./install.sh` di folder itu.
+
+### Instalasi manual
+
+<details>
+<summary>Kalau mau memasang sendiri, atau script gagal</summary>
 
 1. Simpan kode di lokasi permanen:
 
@@ -46,8 +63,6 @@ git clone https://github.com/firasmpratama/beans-memory ~/tools/beans-memory
 cd ~/tools/beans-memory
 bun test   # opsional, butuh Bun; memakai database sementara
 ```
-
-Tidak punya git? Unduh arsip source dari halaman Releases dan ekstrak di lokasi permanen.
 
 2. Buat loader OpenCode:
 
@@ -96,6 +111,8 @@ bun -e 'import("/path/absolut/ke/beans-memory/src/plugin.ts").then((m) => consol
 ```
 
 Hasilnya harus `function`. Error path atau import di sini juga akan membuat plugin gagal di OpenCode.
+
+</details>
 
 ## Pemakaian
 

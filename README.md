@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/peanut.svg" alt="A peanut cracked open, shell halves peeled back" width="360">
+  <img src="docs/peanut.svg" alt="Two golden beans joined by a center crease" width="360">
 </p>
 
 <h1 align="center">beans-memory</h1>
@@ -37,7 +37,24 @@ OpenCode (Bun runtime)
   - `curl -fsSL https://bun.sh/install | bash`
 - macOS or Linux. Windows works in theory but is untested.
 
-## Install
+## Quick start
+
+```bash
+git clone https://github.com/firasmpratama/beans-memory ~/tools/beans-memory
+cd ~/tools/beans-memory
+./install.sh
+```
+
+Then restart OpenCode and ask the agent to call `memory_stats`. On a fresh install it returns zero notes.
+
+The installer writes the plugin loader, creates the `beans-memory` CLI launcher when Bun is available, and installs the skill. It does not edit `opencode.json` and does not start a service.
+
+No git? Download the source archive from the Releases page, unpack it anywhere permanent, and run `./install.sh` there.
+
+### Manual install
+
+<details>
+<summary>Prefer to wire it yourself, or the script failed?</summary>
 
 1. Get the code somewhere permanent:
 
@@ -46,8 +63,6 @@ git clone https://github.com/firasmpratama/beans-memory ~/tools/beans-memory
 cd ~/tools/beans-memory
 bun test   # optional, requires Bun; uses a temporary database
 ```
-
-No git? Download the source archive from the Releases page and unpack it anywhere permanent.
 
 2. Create the OpenCode loader:
 
@@ -96,6 +111,8 @@ bun -e 'import("/absolute/path/to/beans-memory/src/plugin.ts").then((m) => conso
 ```
 
 It should print `function`. A path or import error here will also break the plugin in OpenCode.
+
+</details>
 
 ## Use
 
