@@ -128,6 +128,42 @@ Contoh Claude Desktop:
 }
 ```
 
+## Agent lain
+
+Server MCP bisa dipakai klien apa pun yang mendukung stdio MCP. Semua agent di mesin yang sama berbagi satu database, jadi catatan dari Claude Code terlihat di Codex, Gemini CLI, dan OpenCode.
+
+File siap pakai ada di `examples/`. Ganti `/ABSOLUTE/PATH/TO/` dengan path sebenarnya.
+
+### Claude Code
+
+```bash
+claude mcp add --scope user --transport stdio agent_memory -- \
+  /ABSOLUTE/PATH/TO/bun /ABSOLUTE/PATH/TO/agent-memory/src/mcp.ts
+```
+
+Atau copy `examples/claude-code.mcp.json` ke `.mcp.json` di root project untuk server ber-scope project yang bisa dipakai satu tim.
+
+Nama tool diberi prefix: `mcp__agent_memory__memory_search`.
+
+### Codex
+
+Gabungkan `examples/codex.config.toml` ke `~/.codex/config.toml`. Untuk scope project, pakai `.codex/config.toml` di dalam project yang sudah dipercaya.
+
+### Gemini CLI
+
+```bash
+gemini mcp add -s user agent-memory \
+  /ABSOLUTE/PATH/TO/bun /ABSOLUTE/PATH/TO/agent-memory/src/mcp.ts
+```
+
+Atau gabungkan `examples/gemini.settings.json` ke `~/.gemini/settings.json`.
+
+Pertahankan tanda hubung di nama server (`agent-memory`). Gemini menyusun nama tool sebagai `mcp_<server>_<tool>` dan parser policy-nya memecah pada underscore pertama, jadi underscore di nama server merusak aturan wildcard.
+
+### Beri tahu agent cara memakainya
+
+Config hanya membuka tool. Tambahkan `examples/memory-instructions.md` ke file instruksi agent: `CLAUDE.md`, `AGENTS.md`, atau `GEMINI.md`.
+
 ## Data
 
 Lokasi default:
@@ -181,7 +217,8 @@ bun src/migrate-legacy-db.ts --from /lama/memory.db
 ## Keamanan
 
 - Data tetap di mesin ini. Tidak ada panggilan jaringan, tidak ada telemetri.
-- Catatan disimpan apa adanya. Tidak ada redaksi rahasia. Jangan simpan token, password, atau isi `.env` ke dalam catatan.
+- Catatan disimpan apa adanya. Tidak ada redaksi rahasia pada catatan. Jangan simpan token, password, atau isi `.env` ke dalam catatan.
+- Prompt yang ditangkap otomatis diredaksi untuk pola rahasia umum: API key OpenAI/GitHub/AWS/Google, webhook Slack/Discord, dan pola `password=` / `token:`. Redaksi ini tidak lengkap, jadi tetap jangan menempelkan rahasia ke chat.
 - Database bisa dibaca proses apa pun yang berjalan sebagai user kamu. Perlakukan seperti file catatan, bukan vault.
 
 ## Keterbatasan
@@ -189,6 +226,7 @@ bun src/migrate-legacy-db.ts --from /lama/memory.db
 - Pencarian hanya kata kunci, tanpa embedding.
 - Tidak ada ringkasan otomatis. Catatan hanya ada kalau agent menulisnya.
 - Injeksi konteks hanya index singkat (8 judul), bukan isi lengkap.
+- Identitas project adalah basename working directory. Dua repo berbeda dengan nama folder sama akan berbagi catatan, kecuali kamu set `MEMORY_PROJECT`.
 - Satu pengguna, satu mesin. Tanpa sinkronisasi.
 - SQLite diakses oleh proses plugin dan proses MCP. Mode WAL plus busy timeout 5 detik menangani itu; penulisan konkuren berat bukan target desain.
 

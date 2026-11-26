@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "agent-memory": {
+      "command": "/ABSOLUTE/PATH/TO/bun",
+      "args": ["/ABSOLUTE/PATH/TO/agent-memory/src/mcp.ts"],
+      "timeout": 30000,
+      "trust": false
+    }
+  }
+}

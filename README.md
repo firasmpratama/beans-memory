@@ -128,6 +128,42 @@ Claude Desktop example:
 }
 ```
 
+## Other agents
+
+The MCP server works with any client that speaks stdio MCP. Every agent on the same machine shares one database, so a note saved from Claude Code is visible in Codex, Gemini CLI, and OpenCode.
+
+Ready-to-copy files live in `examples/`. Replace `/ABSOLUTE/PATH/TO/` with real paths first.
+
+### Claude Code
+
+```bash
+claude mcp add --scope user --transport stdio agent_memory -- \
+  /ABSOLUTE/PATH/TO/bun /ABSOLUTE/PATH/TO/agent-memory/src/mcp.ts
+```
+
+Or copy `examples/claude-code.mcp.json` to `.mcp.json` at the project root for a project-scoped server that the whole team can share.
+
+Tool names are prefixed: `mcp__agent_memory__memory_search`.
+
+### Codex
+
+Merge `examples/codex.config.toml` into `~/.codex/config.toml`. For a project-scoped server, use `.codex/config.toml` inside a trusted project instead.
+
+### Gemini CLI
+
+```bash
+gemini mcp add -s user agent-memory \
+  /ABSOLUTE/PATH/TO/bun /ABSOLUTE/PATH/TO/agent-memory/src/mcp.ts
+```
+
+Or merge `examples/gemini.settings.json` into `~/.gemini/settings.json`.
+
+Keep the hyphen in the server name (`agent-memory`). Gemini builds tool names as `mcp_<server>_<tool>` and its policy parser splits on the first underscore, so an underscore in the server name breaks wildcard rules.
+
+### Tell the agent to use it
+
+Config alone only exposes tools. Append `examples/memory-instructions.md` to the agent instruction file: `CLAUDE.md`, `AGENTS.md`, or `GEMINI.md`.
+
 ## Data
 
 Default location:
@@ -181,7 +217,8 @@ bun src/migrate-legacy-db.ts --from /old/memory.db
 ## Security
 
 - Data stays on this machine. No network calls, no telemetry.
-- Notes are stored as written. There is no secret redaction. Do not save tokens, passwords, or `.env` contents into a note.
+- Notes are stored as written. There is no secret redaction for notes. Do not save tokens, passwords, or `.env` contents into a note.
+- Prompts captured automatically are redacted for common secret patterns: OpenAI/GitHub/AWS/Google API keys, Slack/Discord webhooks, and `password=` / `token:` style assignments. Redaction is best effort, not a guarantee, so still avoid pasting secrets into chat.
 - The database is readable by any process running as your user. Treat it like a notes file, not a vault.
 
 ## Limitations
@@ -189,6 +226,7 @@ bun src/migrate-legacy-db.ts --from /old/memory.db
 - Keyword search only, no embeddings.
 - No automatic summarization. Notes exist only when the agent writes them.
 - Context injection is a short index (8 titles), not full bodies.
+- Project identity is the working-directory basename. Two unrelated repositories with the same folder name share notes unless you set `MEMORY_PROJECT`.
 - Single user, single machine. No sync.
 - SQLite is accessed by the plugin process and the MCP process. WAL mode plus a 5 second busy timeout handles that; heavy concurrent writes are not a design goal.
 

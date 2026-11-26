@@ -1,0 +1,8 @@
+[mcp_servers.agent_memory]
+command = "/ABSOLUTE/PATH/TO/bun"
+args = ["/ABSOLUTE/PATH/TO/agent-memory/src/mcp.ts"]
+startup_timeout_sec = 20
+tool_timeout_sec = 60
+
+[mcp_servers.agent_memory.env]
+# MEMORY_DB = "/Users/you/.local/share/agent-memory/memory.db"
