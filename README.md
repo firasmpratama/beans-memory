@@ -1,8 +1,16 @@
-# agent-memory
+<p align="center">
+  <img src="docs/peanut.svg" alt="A peanut cracked open, shell halves peeled back" width="360">
+</p>
 
-English | [Bahasa Indonesia](README.id.md)
+<h1 align="center">beans-memory</h1>
 
-Local, persistent memory for [OpenCode](https://opencode.ai). No daemon, no cloud, no account. One SQLite file per machine.
+<p align="center">
+  Local, persistent memory for coding agents. One SQLite file. No daemon, no cloud, no account.
+</p>
+
+<p align="center">
+  English | <a href="README.id.md">Bahasa Indonesia</a>
+</p>
 
 The agent can save notes while it works, search them later, and gets a small index injected at the start of each session.
 
@@ -12,7 +20,7 @@ The agent can save notes while it works, search them later, and gets a small ind
 OpenCode (Bun runtime)
 ├── plugin  src/plugin.ts   hooks + memory_* tools, runs in-process
 ├── MCP     src/mcp.ts      same tools over stdio, for other clients
-└── SQLite  ~/.local/share/agent-memory/memory.db
+└── SQLite  ~/.local/share/beans-memory/memory.db
               observations + FTS5 + prompts + sessions
 ```
 
@@ -34,8 +42,8 @@ OpenCode (Bun runtime)
 1. Get the code somewhere permanent:
 
 ```bash
-git clone https://github.com/firasmpratama/agent-memory ~/tools/agent-memory
-cd ~/tools/agent-memory
+git clone https://github.com/firasmpratama/beans-memory ~/tools/beans-memory
+cd ~/tools/beans-memory
 bun test   # optional, uses a temporary database
 ```
 
@@ -50,7 +58,7 @@ mkdir -p ~/.config/opencode/plugins/memory
 ```ts
 import { pathToFileURL } from "node:url";
 
-const ENTRY = "/absolute/path/to/agent-memory/src/plugin.ts";
+const ENTRY = "/absolute/path/to/beans-memory/src/plugin.ts";
 
 const noop = {
   id: "memory",
@@ -100,9 +108,9 @@ For clients that cannot load the plugin:
 {
   "mcp": {
     "servers": {
-      "agent_memory": {
+      "beans_memory": {
         "type": "local",
-        "command": ["/absolute/path/to/bun", "/absolute/path/to/agent-memory/src/mcp.ts"]
+        "command": ["/absolute/path/to/bun", "/absolute/path/to/beans-memory/src/mcp.ts"]
       }
     }
   }
@@ -111,7 +119,7 @@ For clients that cannot load the plugin:
 
 - The server speaks JSON-RPC over stdio, one message per line.
 - Tools: `memory_search`, `memory_get`, `memory_note`, `memory_stats`.
-- Database selection: `MEMORY_DB`, otherwise `~/.local/share/agent-memory/memory.db`.
+- Database selection: `MEMORY_DB`, otherwise `~/.local/share/beans-memory/memory.db`.
 - Project name: `MEMORY_PROJECT`, otherwise the basename of the process working directory.
 
 Claude Desktop example:
@@ -119,10 +127,10 @@ Claude Desktop example:
 ```json
 {
   "mcpServers": {
-    "agent-memory": {
+    "beans-memory": {
       "command": "/absolute/path/to/bun",
-      "args": ["/absolute/path/to/agent-memory/src/mcp.ts"],
-      "env": { "MEMORY_DB": "/Users/you/.local/share/agent-memory/memory.db" }
+      "args": ["/absolute/path/to/beans-memory/src/mcp.ts"],
+      "env": { "MEMORY_DB": "/Users/you/.local/share/beans-memory/memory.db" }
     }
   }
 }
@@ -149,7 +157,7 @@ Flags: `--limit`, `--type`, `--files a,b`, `--concepts x,y`, `--json`, `--db <pa
 Install a launcher on PATH:
 
 ```bash
-printf '#!/bin/sh\nexec /ABSOLUTE/PATH/TO/bun /ABSOLUTE/PATH/TO/agent-memory/src/cli.ts "$@"\n' \
+printf '#!/bin/sh\nexec /ABSOLUTE/PATH/TO/bun /ABSOLUTE/PATH/TO/beans-memory/src/cli.ts "$@"\n' \
   > ~/.local/bin/beans-memory
 chmod +x ~/.local/bin/beans-memory
 ```
@@ -167,13 +175,13 @@ Ready-to-copy files live in `examples/`. Replace `/ABSOLUTE/PATH/TO/` with real 
 ### Claude Code
 
 ```bash
-claude mcp add --scope user --transport stdio agent_memory -- \
-  /ABSOLUTE/PATH/TO/bun /ABSOLUTE/PATH/TO/agent-memory/src/mcp.ts
+claude mcp add --scope user --transport stdio beans_memory -- \
+  /ABSOLUTE/PATH/TO/bun /ABSOLUTE/PATH/TO/beans-memory/src/mcp.ts
 ```
 
 Or copy `examples/claude-code.mcp.json` to `.mcp.json` at the project root for a project-scoped server that the whole team can share.
 
-Tool names are prefixed: `mcp__agent_memory__memory_search`.
+Tool names are prefixed: `mcp__beans_memory__memory_search`.
 
 ### Codex
 
@@ -182,13 +190,13 @@ Merge `examples/codex.config.toml` into `~/.codex/config.toml`. For a project-sc
 ### Gemini CLI
 
 ```bash
-gemini mcp add -s user agent-memory \
-  /ABSOLUTE/PATH/TO/bun /ABSOLUTE/PATH/TO/agent-memory/src/mcp.ts
+gemini mcp add -s user beans-memory \
+  /ABSOLUTE/PATH/TO/bun /ABSOLUTE/PATH/TO/beans-memory/src/mcp.ts
 ```
 
 Or merge `examples/gemini.settings.json` into `~/.gemini/settings.json`.
 
-Keep the hyphen in the server name (`agent-memory`). Gemini builds tool names as `mcp_<server>_<tool>` and its policy parser splits on the first underscore, so an underscore in the server name breaks wildcard rules.
+Keep the hyphen in the server name (`beans-memory`). Gemini builds tool names as `mcp_<server>_<tool>` and its policy parser splits on the first underscore, so an underscore in the server name breaks wildcard rules.
 
 ### Tell the agent to use it
 
@@ -199,7 +207,7 @@ Config alone only exposes tools. Append `examples/memory-instructions.md` to the
 Default location:
 
 ```
-~/.local/share/agent-memory/memory.db
+~/.local/share/beans-memory/memory.db
 ```
 
 Override with `MEMORY_DB=/path/to/memory.db`. All projects share one file; the `project` column separates them. The project name comes from the basename of the working directory, so `~/work/api` is project `api`.
@@ -207,13 +215,13 @@ Override with `MEMORY_DB=/path/to/memory.db`. All projects share one file; the `
 Backup, with OpenCode closed:
 
 ```bash
-cp ~/.local/share/agent-memory/memory.db ~/backup-memory.db
+cp ~/.local/share/beans-memory/memory.db ~/backup-memory.db
 ```
 
 Or online:
 
 ```bash
-sqlite3 ~/.local/share/agent-memory/memory.db ".backup '/path/to/copy.db'"
+sqlite3 ~/.local/share/beans-memory/memory.db ".backup '/path/to/copy.db'"
 ```
 
 Reset: stop OpenCode, delete the file, start again. The schema is recreated empty.
@@ -225,7 +233,7 @@ Timestamps are stored in UTC and displayed in local time.
 If you have an old `~/.claude-mem/claude-mem.db`:
 
 ```bash
-cd /path/to/agent-memory
+cd /path/to/beans-memory
 
 # observations; discovery-type rows are skipped by default
 bun src/import-claude-mem-db.ts --dry-run
@@ -274,7 +282,7 @@ src/rehash.ts               one-time hash migration
 src/redact-prompts.ts       redact existing prompt rows
 src/import-claude-mem-db.ts import observations from claude-mem
 src/import-claude-mem-extras.ts import summaries and prompts
-src/migrate-legacy-db.ts    copy an older agent-memory database
+src/migrate-legacy-db.ts    copy an older beans-memory database
 skills/beans-memory/        agent skill for the CLI
 test/                       bun test: repo, edges, time, MCP, CLI, redaction
 ```
@@ -282,5 +290,5 @@ test/                       bun test: repo, edges, time, MCP, CLI, redaction
 ## Uninstall
 
 1. Remove `~/.config/opencode/plugins/memory/`.
-2. Remove the `agent_memory` entry from `opencode.json` if you added it.
-3. Delete `~/.local/share/agent-memory/` if you do not want to keep the notes.
+2. Remove the `beans_memory` entry from `opencode.json` if you added it.
+3. Delete `~/.local/share/beans-memory/` if you do not want to keep the notes.

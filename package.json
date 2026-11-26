@@ -1,7 +1,41 @@
 {
-  "name": "agent-memory",
+  "name": "beans-memory",
   "version": "0.1.0",
-  "private": true,
+  "description": "Local persistent memory for OpenCode and other coding agents: SQLite + FTS5 plugin, MCP server, and CLI",
   "type": "module",
-  "description": "Local memory for OpenCode: SQLite + FTS5 plugin and MCP server"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/firasmpratama/beans-memory.git"
+  },
+  "homepage": "https://github.com/firasmpratama/beans-memory",
+  "bugs": {
+    "url": "https://github.com/firasmpratama/beans-memory/issues"
+  },
+  "bin": {
+    "beans-memory": "./src/cli.ts"
+  },
+  "files": [
+    "src",
+    "skills",
+    "examples",
+    "docs",
+    "README.md",
+    "README.id.md",
+    "SECURITY.md"
+  ],
+  "keywords": [
+    "opencode",
+    "memory",
+    "sqlite",
+    "fts5",
+    "mcp",
+    "coding-agent"
+  ],
+  "engines": {
+    "bun": ">=1.2.0"
+  },
+  "scripts": {
+    "test": "bun test"
+  }
 }

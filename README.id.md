@@ -1,8 +1,16 @@
-# agent-memory
+<p align="center">
+  <img src="docs/peanut.svg" alt="Kacang yang baru dibuka, kulitnya terbuka" width="360">
+</p>
 
-[English](README.md) | Bahasa Indonesia
+<h1 align="center">beans-memory</h1>
 
-Memory lokal dan permanen untuk [OpenCode](https://opencode.ai). Tanpa daemon, tanpa cloud, tanpa akun. Satu file SQLite per mesin.
+<p align="center">
+  Memory lokal dan permanen untuk coding agent. Satu file SQLite. Tanpa daemon, tanpa cloud, tanpa akun.
+</p>
+
+<p align="center">
+  <a href="README.md">English</a> | Bahasa Indonesia
+</p>
 
 Agent bisa menyimpan catatan saat bekerja, mencarinya lagi nanti, dan menerima index kecil di awal setiap sesi.
 
@@ -12,7 +20,7 @@ Agent bisa menyimpan catatan saat bekerja, mencarinya lagi nanti, dan menerima i
 OpenCode (runtime Bun)
 ├── plugin  src/plugin.ts   hook + tool memory_*, jalan di dalam proses
 ├── MCP     src/mcp.ts      tool yang sama lewat stdio, untuk klien lain
-└── SQLite  ~/.local/share/agent-memory/memory.db
+└── SQLite  ~/.local/share/beans-memory/memory.db
               observations + FTS5 + prompts + sessions
 ```
 
@@ -34,8 +42,8 @@ OpenCode (runtime Bun)
 1. Simpan kode di lokasi permanen:
 
 ```bash
-git clone https://github.com/firasmpratama/agent-memory ~/tools/agent-memory
-cd ~/tools/agent-memory
+git clone https://github.com/firasmpratama/beans-memory ~/tools/beans-memory
+cd ~/tools/beans-memory
 bun test   # opsional, memakai database sementara
 ```
 
@@ -50,7 +58,7 @@ mkdir -p ~/.config/opencode/plugins/memory
 ```ts
 import { pathToFileURL } from "node:url";
 
-const ENTRY = "/path/absolut/ke/agent-memory/src/plugin.ts";
+const ENTRY = "/path/absolut/ke/beans-memory/src/plugin.ts";
 
 const noop = {
   id: "memory",
@@ -100,9 +108,9 @@ Untuk klien yang tidak bisa memuat plugin:
 {
   "mcp": {
     "servers": {
-      "agent_memory": {
+      "beans_memory": {
         "type": "local",
-        "command": ["/path/absolut/ke/bun", "/path/absolut/ke/agent-memory/src/mcp.ts"]
+        "command": ["/path/absolut/ke/bun", "/path/absolut/ke/beans-memory/src/mcp.ts"]
       }
     }
   }
@@ -111,7 +119,7 @@ Untuk klien yang tidak bisa memuat plugin:
 
 - Server memakai JSON-RPC lewat stdio, satu pesan per baris.
 - Tool: `memory_search`, `memory_get`, `memory_note`, `memory_stats`.
-- Pemilihan database: `MEMORY_DB`, kalau kosong `~/.local/share/agent-memory/memory.db`.
+- Pemilihan database: `MEMORY_DB`, kalau kosong `~/.local/share/beans-memory/memory.db`.
 - Nama project: `MEMORY_PROJECT`, kalau kosong basename dari working directory proses.
 
 Contoh Claude Desktop:
@@ -119,10 +127,10 @@ Contoh Claude Desktop:
 ```json
 {
   "mcpServers": {
-    "agent-memory": {
+    "beans-memory": {
       "command": "/path/absolut/ke/bun",
-      "args": ["/path/absolut/ke/agent-memory/src/mcp.ts"],
-      "env": { "MEMORY_DB": "/Users/kamu/.local/share/agent-memory/memory.db" }
+      "args": ["/path/absolut/ke/beans-memory/src/mcp.ts"],
+      "env": { "MEMORY_DB": "/Users/kamu/.local/share/beans-memory/memory.db" }
     }
   }
 }
@@ -149,7 +157,7 @@ Flag: `--limit`, `--type`, `--files a,b`, `--concepts x,y`, `--json`, `--db <pat
 Pasang launcher ke PATH:
 
 ```bash
-printf '#!/bin/sh\nexec /ABSOLUTE/PATH/TO/bun /ABSOLUTE/PATH/TO/agent-memory/src/cli.ts "$@"\n' \
+printf '#!/bin/sh\nexec /ABSOLUTE/PATH/TO/bun /ABSOLUTE/PATH/TO/beans-memory/src/cli.ts "$@"\n' \
   > ~/.local/bin/beans-memory
 chmod +x ~/.local/bin/beans-memory
 ```
@@ -167,13 +175,13 @@ File siap pakai ada di `examples/`. Ganti `/ABSOLUTE/PATH/TO/` dengan path seben
 ### Claude Code
 
 ```bash
-claude mcp add --scope user --transport stdio agent_memory -- \
-  /ABSOLUTE/PATH/TO/bun /ABSOLUTE/PATH/TO/agent-memory/src/mcp.ts
+claude mcp add --scope user --transport stdio beans_memory -- \
+  /ABSOLUTE/PATH/TO/bun /ABSOLUTE/PATH/TO/beans-memory/src/mcp.ts
 ```
 
 Atau copy `examples/claude-code.mcp.json` ke `.mcp.json` di root project untuk server ber-scope project yang bisa dipakai satu tim.
 
-Nama tool diberi prefix: `mcp__agent_memory__memory_search`.
+Nama tool diberi prefix: `mcp__beans_memory__memory_search`.
 
 ### Codex
 
@@ -182,13 +190,13 @@ Gabungkan `examples/codex.config.toml` ke `~/.codex/config.toml`. Untuk scope pr
 ### Gemini CLI
 
 ```bash
-gemini mcp add -s user agent-memory \
-  /ABSOLUTE/PATH/TO/bun /ABSOLUTE/PATH/TO/agent-memory/src/mcp.ts
+gemini mcp add -s user beans-memory \
+  /ABSOLUTE/PATH/TO/bun /ABSOLUTE/PATH/TO/beans-memory/src/mcp.ts
 ```
 
 Atau gabungkan `examples/gemini.settings.json` ke `~/.gemini/settings.json`.
 
-Pertahankan tanda hubung di nama server (`agent-memory`). Gemini menyusun nama tool sebagai `mcp_<server>_<tool>` dan parser policy-nya memecah pada underscore pertama, jadi underscore di nama server merusak aturan wildcard.
+Pertahankan tanda hubung di nama server (`beans-memory`). Gemini menyusun nama tool sebagai `mcp_<server>_<tool>` dan parser policy-nya memecah pada underscore pertama, jadi underscore di nama server merusak aturan wildcard.
 
 ### Beri tahu agent cara memakainya
 
@@ -199,7 +207,7 @@ Config hanya membuka tool. Tambahkan `examples/memory-instructions.md` ke file i
 Lokasi default:
 
 ```
-~/.local/share/agent-memory/memory.db
+~/.local/share/beans-memory/memory.db
 ```
 
 Ubah dengan `MEMORY_DB=/path/ke/memory.db`. Semua project memakai satu file; kolom `project` yang memisahkan. Nama project diambil dari basename working directory, jadi `~/work/api` menjadi project `api`.
@@ -207,13 +215,13 @@ Ubah dengan `MEMORY_DB=/path/ke/memory.db`. Semua project memakai satu file; kol
 Backup, dengan OpenCode tertutup:
 
 ```bash
-cp ~/.local/share/agent-memory/memory.db ~/backup-memory.db
+cp ~/.local/share/beans-memory/memory.db ~/backup-memory.db
 ```
 
 Atau saat database hidup:
 
 ```bash
-sqlite3 ~/.local/share/agent-memory/memory.db ".backup '/path/ke/copy.db'"
+sqlite3 ~/.local/share/beans-memory/memory.db ".backup '/path/ke/copy.db'"
 ```
 
 Reset: hentikan OpenCode, hapus file, jalankan lagi. Skema dibuat ulang dalam keadaan kosong.
@@ -225,7 +233,7 @@ Timestamp disimpan dalam UTC dan ditampilkan dalam waktu lokal.
 Kalau punya `~/.claude-mem/claude-mem.db` lama:
 
 ```bash
-cd /path/ke/agent-memory
+cd /path/ke/beans-memory
 
 # observasi; baris bertipe discovery dilewati secara default
 bun src/import-claude-mem-db.ts --dry-run
@@ -274,7 +282,7 @@ src/rehash.ts               migrasi hash sekali jalan
 src/redact-prompts.ts       redaksi baris prompt lama
 src/import-claude-mem-db.ts import observasi dari claude-mem
 src/import-claude-mem-extras.ts import ringkasan dan prompt
-src/migrate-legacy-db.ts    salin database agent-memory versi lama
+src/migrate-legacy-db.ts    salin database beans-memory versi lama
 skills/beans-memory/        skill agent untuk CLI
 test/                       bun test: repo, edge, time, MCP, CLI, redaksi
 ```
@@ -282,5 +290,5 @@ test/                       bun test: repo, edge, time, MCP, CLI, redaksi
 ## Uninstall
 
 1. Hapus `~/.config/opencode/plugins/memory/`.
-2. Hapus entri `agent_memory` dari `opencode.json` kalau pernah ditambahkan.
-3. Hapus `~/.local/share/agent-memory/` kalau catatan tidak ingin disimpan.
+2. Hapus entri `beans_memory` dari `opencode.json` kalau pernah ditambahkan.
+3. Hapus `~/.local/share/beans-memory/` kalau catatan tidak ingin disimpan.
