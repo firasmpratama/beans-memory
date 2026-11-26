@@ -1,6 +1,6 @@
 {
   "name": "beans-memory",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Local persistent memory for OpenCode and other coding agents: SQLite + FTS5 plugin, MCP server, and CLI",
   "type": "module",
   "license": "MIT",
