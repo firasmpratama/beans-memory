@@ -8,7 +8,7 @@ Only the latest commit on `main` receives security fixes.
 
 Use GitHub private vulnerability reporting:
 
-https://github.com/firasmpratama/agent-memory/security/advisories/new
+https://github.com/firasmpratama/beans-memory/security/advisories/new
 
 Do not open a public issue for a vulnerability.
 

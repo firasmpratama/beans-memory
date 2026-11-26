@@ -1,5 +1,5 @@
 import { Database } from "bun:sqlite";
-import { chmodSync, mkdirSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 
@@ -9,9 +9,20 @@ export function resolveDbPath(_directory: string = process.cwd()): string {
     mkdirSync(dirname(override), { recursive: true, mode: 0o700 });
     return resolve(override);
   }
-  const folder = join(homedir(), ".local", "share", "agent-memory");
+  const folder = join(homedir(), ".local", "share", "beans-memory");
   mkdirSync(folder, { recursive: true, mode: 0o700 });
-  return join(folder, "memory.db");
+  const current = join(folder, "memory.db");
+  const legacy = join(homedir(), ".local", "share", "agent-memory", "memory.db");
+  if (!existsSync(current) && existsSync(legacy)) {
+    try {
+      const old = new Database(legacy, { readonly: true });
+      old.run("VACUUM INTO ?", [current]);
+      old.close();
+    } catch {
+      // leave the legacy database untouched if the copy fails
+    }
+  }
+  return current;
 }
 
 function secure(path: string): void {

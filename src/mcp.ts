@@ -179,7 +179,7 @@ rl.on("line", (line) => {
       reply(id, {
         protocolVersion,
         capabilities: { tools: {} },
-        serverInfo: { name: "agent-memory", version: "0.1.0" },
+        serverInfo: { name: "beans-memory", version: "0.1.0" },
       });
       return;
     }

@@ -20,7 +20,7 @@ type RpcResponse = {
 
 describe("MCP stdio server", () => {
   test("initializes, lists tools, stores and searches a note, then shuts down", async () => {
-    const directory = mkdtempSync(join(tmpdir(), "agent-memory-mcp-e2e-"));
+    const directory = mkdtempSync(join(tmpdir(), "beans-memory-mcp-e2e-"));
     const databasePath = join(directory, "memory.db");
     const projectRoot = dirname(dirname(fileURLToPath(import.meta.url)));
     const child = spawn(process.execPath, ["src/mcp.ts"], {
@@ -91,7 +91,7 @@ describe("MCP stdio server", () => {
       expect(initialized.jsonrpc).toBe("2.0");
       expect(initialized.id).toBe(1);
       expect(initialized.result?.protocolVersion).toBe("2024-11-05");
-      expect(initialized.result?.serverInfo?.name).toBe("agent-memory");
+      expect(initialized.result?.serverInfo?.name).toBe("beans-memory");
 
       const tools = await request(2, "tools/list");
       expect(tools.result?.tools?.map((tool) => tool.name)).toContain("memory_note");

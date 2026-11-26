@@ -4,5 +4,5 @@ args = ["/ABSOLUTE/PATH/TO/beans-memory/src/mcp.ts"]
 startup_timeout_sec = 20
 tool_timeout_sec = 60
 
-[mcp_servers.agent_memory.env]
-# MEMORY_DB = "/Users/you/.local/share/agent-memory/memory.db"
+[mcp_servers.beans_memory.env]
+# MEMORY_DB = "/Users/you/.local/share/beans-memory/memory.db"

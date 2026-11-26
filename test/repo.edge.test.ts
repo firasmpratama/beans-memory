@@ -16,7 +16,7 @@ let directory: string;
 let db: Database;
 
 beforeEach(() => {
-  directory = mkdtempSync(join(tmpdir(), "agent-memory-repo-edge-"));
+  directory = mkdtempSync(join(tmpdir(), "beans-memory-repo-edge-"));
   db = openDb(join(directory, "memory.db"));
 });
 

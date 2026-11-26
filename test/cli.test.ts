@@ -3,7 +3,7 @@ import { mkdtempSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-const directory = mkdtempSync(join(tmpdir(), "agent-memory-cli-"));
+const directory = mkdtempSync(join(tmpdir(), "beans-memory-cli-"));
 const db = join(directory, "memory.db");
 const cli = join(import.meta.dir, "..", "src", "cli.ts");
 

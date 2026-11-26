@@ -14,7 +14,7 @@ import {
   touchSessionFiles,
 } from "../src/repo";
 
-const directory = mkdtempSync(join(tmpdir(), "agent-memory-"));
+const directory = mkdtempSync(join(tmpdir(), "beans-memory-"));
 const db = openDb(join(directory, "memory.db"));
 const project = "demo";
 

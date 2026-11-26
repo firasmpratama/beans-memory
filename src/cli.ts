@@ -50,12 +50,12 @@ function usage(): never {
   console.error(
     [
       "Usage:",
-      "  agent-memory search <query> [--limit=N] [--type=T] [--json]",
-      "  agent-memory get <id...> [--json]",
-      "  agent-memory note --title <title> (--body <text> | --stdin) [--type=T] [--files a,b] [--concepts x,y]",
-      "  agent-memory recent [--limit=N] [--json]",
-      "  agent-memory stats [--json]",
-      "  agent-memory projects [--json]",
+      "  beans-memory search <query> [--limit=N] [--type=T] [--json]",
+      "  beans-memory get <id...> [--json]",
+      "  beans-memory note --title <title> (--body <text> | --stdin) [--type=T] [--files a,b] [--concepts x,y]",
+      "  beans-memory recent [--limit=N] [--json]",
+      "  beans-memory stats [--json]",
+      "  beans-memory projects [--json]",
       "",
       "Global: --db <path>, --project <name>",
       "Env: MEMORY_DB, MEMORY_PROJECT",
