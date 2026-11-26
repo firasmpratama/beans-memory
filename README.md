@@ -128,6 +128,36 @@ Claude Desktop example:
 }
 ```
 
+## CLI and skill (optional)
+
+The same store is available without any tool registration:
+
+```bash
+bun src/cli.ts search "query" --limit 5
+bun src/cli.ts get 12 13
+bun src/cli.ts note --title "Title" --type decision --body "What changed and why"
+bun src/cli.ts note --title "Title" --stdin <<'EOF'
+Multi-line body.
+EOF
+bun src/cli.ts recent --limit 5
+bun src/cli.ts stats
+bun src/cli.ts projects
+```
+
+Flags: `--limit`, `--type`, `--files a,b`, `--concepts x,y`, `--json`, `--db <path>`, `--project <name>`.
+
+Install a launcher on PATH:
+
+```bash
+printf '#!/bin/sh\nexec /ABSOLUTE/PATH/TO/bun /ABSOLUTE/PATH/TO/agent-memory/src/cli.ts "$@"\n' \
+  > ~/.local/bin/beans-memory
+chmod +x ~/.local/bin/beans-memory
+```
+
+The skill in `skills/beans-memory/SKILL.md` teaches the agent when to run those commands. Copy it to `~/.claude/skills/beans-memory/SKILL.md`; OpenCode and Claude Code both read that directory.
+
+When the skill is the only path you want, set `MEMORY_TOOLS=off` before starting OpenCode. Plugin hooks still capture prompts and inject context; the four plugin tools are not registered.
+
 ## Other agents
 
 The MCP server works with any client that speaks stdio MCP. Every agent on the same machine shares one database, so a note saved from Claude Code is visible in Codex, Gemini CLI, and OpenCode.
@@ -237,11 +267,16 @@ src/db.ts                   schema, FTS5, migrations
 src/repo.ts                 queries: sessions, prompts, observations, search
 src/plugin.ts               OpenCode plugin: hooks and tools
 src/mcp.ts                  MCP stdio server
+src/cli.ts                  CLI for skill-based use
 src/time.ts                 UTC to local formatting
+src/redact.ts               secret redaction for captured prompts
+src/rehash.ts               one-time hash migration
+src/redact-prompts.ts       redact existing prompt rows
 src/import-claude-mem-db.ts import observations from claude-mem
 src/import-claude-mem-extras.ts import summaries and prompts
 src/migrate-legacy-db.ts    copy an older agent-memory database
-test/repo.test.ts           bun test
+skills/beans-memory/        agent skill for the CLI
+test/                       bun test: repo, edges, time, MCP, CLI, redaction
 ```
 
 ## Uninstall

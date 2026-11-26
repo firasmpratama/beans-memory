@@ -90,7 +90,7 @@ export default {
       }
     };
 
-    if (ctx.tool?.transform) {
+    if (ctx.tool?.transform && process.env.MEMORY_TOOLS !== "off") {
       const registered = await safe<unknown>(
         "register tools",
         () =>

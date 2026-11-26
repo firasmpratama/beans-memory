@@ -128,6 +128,36 @@ Contoh Claude Desktop:
 }
 ```
 
+## CLI dan skill (opsional)
+
+Store yang sama bisa dipakai tanpa registrasi tool:
+
+```bash
+bun src/cli.ts search "query" --limit 5
+bun src/cli.ts get 12 13
+bun src/cli.ts note --title "Judul" --type decision --body "Apa yang berubah dan kenapa"
+bun src/cli.ts note --title "Judul" --stdin <<'EOF'
+Isi multi-baris.
+EOF
+bun src/cli.ts recent --limit 5
+bun src/cli.ts stats
+bun src/cli.ts projects
+```
+
+Flag: `--limit`, `--type`, `--files a,b`, `--concepts x,y`, `--json`, `--db <path>`, `--project <name>`.
+
+Pasang launcher ke PATH:
+
+```bash
+printf '#!/bin/sh\nexec /ABSOLUTE/PATH/TO/bun /ABSOLUTE/PATH/TO/agent-memory/src/cli.ts "$@"\n' \
+  > ~/.local/bin/beans-memory
+chmod +x ~/.local/bin/beans-memory
+```
+
+Skill di `skills/beans-memory/SKILL.md` mengajari agent kapan harus menjalankan perintah itu. Copy ke `~/.claude/skills/beans-memory/SKILL.md`; OpenCode dan Claude Code sama-sama membaca folder tersebut.
+
+Kalau ingin skill sebagai satu-satunya jalur, set `MEMORY_TOOLS=off` sebelum OpenCode dijalankan. Hook plugin tetap menangkap prompt dan menyuntik konteks; empat tool plugin tidak didaftarkan.
+
 ## Agent lain
 
 Server MCP bisa dipakai klien apa pun yang mendukung stdio MCP. Semua agent di mesin yang sama berbagi satu database, jadi catatan dari Claude Code terlihat di Codex, Gemini CLI, dan OpenCode.
@@ -237,11 +267,16 @@ src/db.ts                   skema, FTS5, migrasi
 src/repo.ts                 query: sesi, prompt, observasi, pencarian
 src/plugin.ts               plugin OpenCode: hook dan tool
 src/mcp.ts                  server MCP stdio
+src/cli.ts                  CLI untuk pemakaian lewat skill
 src/time.ts                 format UTC ke waktu lokal
+src/redact.ts               redaksi rahasia untuk prompt yang ditangkap
+src/rehash.ts               migrasi hash sekali jalan
+src/redact-prompts.ts       redaksi baris prompt lama
 src/import-claude-mem-db.ts import observasi dari claude-mem
 src/import-claude-mem-extras.ts import ringkasan dan prompt
 src/migrate-legacy-db.ts    salin database agent-memory versi lama
-test/repo.test.ts           bun test
+skills/beans-memory/        skill agent untuk CLI
+test/                       bun test: repo, edge, time, MCP, CLI, redaksi
 ```
 
 ## Uninstall
