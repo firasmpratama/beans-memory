@@ -1,5 +1,4 @@
 import { basename } from "node:path";
-import { appendFileSync } from "node:fs";
 import { localDate, localStamp } from "./time";
 import { openDb, resolveDbPath } from "./db";
 import {
@@ -69,15 +68,11 @@ export default {
   id: "memory",
   async setup(ctx: AnyContext) {
     const directory = ctx.location?.directory ?? process.cwd();
-    const project = basename(directory);
+    const project = process.env.MEMORY_PROJECT || basename(directory);
 
     let db: ReturnType<typeof openDb>;
     try {
       db = openDb(resolveDbPath(directory));
-      appendFileSync(
-        "/tmp/agent-memory.log",
-        `${new Date().toISOString()} setup pid=${process.pid} project=${project} db=${resolveDbPath(directory)}\n`,
-      );
     } catch (error) {
       console.error("[memory] gagal membuka database:", error);
       return () => {};
@@ -86,9 +81,9 @@ export default {
     const delivered = new Set<string>();
     const controller = new AbortController();
 
-    const safe = <T>(label: string, run: () => T, fallback: T): T => {
+    const safe = async <T>(label: string, run: () => T | Promise<T>, fallback: T): Promise<T> => {
       try {
-        return run();
+        return await run();
       } catch (error) {
         console.error(`[memory] ${label}:`, error);
         return fallback;
@@ -96,7 +91,7 @@ export default {
     };
 
     if (ctx.tool?.transform) {
-      await safe(
+      const registered = await safe<unknown>(
         "register tools",
         () =>
           ctx.tool!.transform((editor) => {
@@ -240,6 +235,14 @@ export default {
           }),
         null,
       );
+      if (registered === null) {
+        try {
+          db.close();
+        } catch {
+          // ignore
+        }
+        return () => {};
+      }
     }
 
     if (ctx.session?.hook) {
@@ -249,11 +252,15 @@ export default {
           ctx.session!.hook("context", async (event: any) => {
             const sessionID = String(event?.sessionID ?? "");
             if (!sessionID || delivered.has(sessionID)) return;
-            delivered.add(sessionID);
-            const rows = recentObservations(db, project, 8);
-            const text = formatContext(project, rows);
-            if (!text) return;
-            event.system?.push({ type: "text", text });
+            try {
+              const rows = recentObservations(db, project, 8);
+              const text = formatContext(project, rows);
+              if (!text || !Array.isArray(event.system)) return;
+              event.system.push({ type: "text", text });
+              delivered.add(sessionID);
+            } catch (error) {
+              console.error("[memory] context gagal:", error);
+            }
           }),
         null,
       );
@@ -265,8 +272,12 @@ export default {
             const sessionID = String(event?.sessionID ?? "");
             const text = typeof event?.prompt?.text === "string" ? event.prompt.text : "";
             if (!sessionID || !text) return;
-            ensureSession(db, { id: sessionID, project, directory });
-            addPrompt(db, { sessionID, project, body: text });
+            try {
+              ensureSession(db, { id: sessionID, project, directory });
+              addPrompt(db, { sessionID, project, body: text });
+            } catch (error) {
+              console.error("[memory] prompt gagal:", error);
+            }
           }),
         null,
       );
@@ -281,8 +292,12 @@ export default {
             if (!sessionID || event?.status !== "completed") return;
             const tool = String(event?.tool ?? "");
             if (!EDIT_TOOLS.has(tool)) return;
-            const files = collectFiles(event?.input);
-            touchSessionFiles(db, sessionID, files);
+            try {
+              const files = collectFiles(event?.input);
+              touchSessionFiles(db, sessionID, files);
+            } catch (error) {
+              console.error("[memory] tool hook gagal:", error);
+            }
           }),
         null,
       );

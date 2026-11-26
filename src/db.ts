@@ -1,25 +1,43 @@
 import { Database } from "bun:sqlite";
-import { mkdirSync } from "node:fs";
+import { chmodSync, mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 
 export function resolveDbPath(_directory: string = process.cwd()): string {
   const override = process.env.MEMORY_DB;
   if (override) {
-    mkdirSync(dirname(override), { recursive: true });
+    mkdirSync(dirname(override), { recursive: true, mode: 0o700 });
     return resolve(override);
   }
   const folder = join(homedir(), ".local", "share", "agent-memory");
-  mkdirSync(folder, { recursive: true });
+  mkdirSync(folder, { recursive: true, mode: 0o700 });
   return join(folder, "memory.db");
+}
+
+function secure(path: string): void {
+  if (path === ":memory:" || path.startsWith("file::memory:")) return;
+  try {
+    chmodSync(path, 0o600);
+  } catch (error) {
+    throw error instanceof Error ? error : new Error(String(error));
+  }
+  for (const file of [`${path}-wal`, `${path}-shm`]) {
+    try {
+      chmodSync(file, 0o600);
+    } catch {
+      // sidecar may not exist yet
+    }
+  }
 }
 
 export function openDb(path: string = resolveDbPath()): Database {
   const db = new Database(path, { create: true });
+  secure(path);
   db.run("PRAGMA journal_mode = WAL");
   db.run("PRAGMA busy_timeout = 5000");
   db.run("PRAGMA foreign_keys = ON");
   migrate(db);
+  secure(path);
   return db;
 }
 

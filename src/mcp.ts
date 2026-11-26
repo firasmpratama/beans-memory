@@ -133,6 +133,8 @@ function callTool(name: string, args: any): string {
   throw new Error(`Tool tidak dikenal: ${name}`);
 }
 
+const SUPPORTED_PROTOCOLS = ["2025-06-18", "2025-03-26", "2024-11-05"];
+
 function send(message: unknown): void {
   process.stdout.write(`${JSON.stringify(message)}\n`);
 }
@@ -159,13 +161,23 @@ rl.on("line", (line) => {
   }
 
   const { id, method, params } = message ?? {};
-  const isNotification = id === undefined || id === null;
+  const hasId = Object.prototype.hasOwnProperty.call(message ?? {}, "id");
+  const isNotification = !hasId;
+
+  if (typeof method !== "string") {
+    if (hasId) fail(id ?? null, -32600, "Invalid Request");
+    return;
+  }
 
   try {
     if (method === "initialize") {
       const requested = params?.protocolVersion;
+      const protocolVersion =
+        typeof requested === "string" && SUPPORTED_PROTOCOLS.includes(requested)
+          ? requested
+          : SUPPORTED_PROTOCOLS[0];
       reply(id, {
-        protocolVersion: typeof requested === "string" ? requested : "2024-11-05",
+        protocolVersion,
         capabilities: { tools: {} },
         serverInfo: { name: "agent-memory", version: "0.1.0" },
       });
@@ -179,11 +191,12 @@ rl.on("line", (line) => {
     }
 
     if (method === "tools/list") {
-      reply(id, { tools: TOOLS });
+      if (!isNotification) reply(id, { tools: TOOLS });
       return;
     }
 
     if (method === "tools/call") {
+      if (isNotification) return;
       const name = String(params?.name ?? "");
       try {
         reply(id, text(callTool(name, params?.arguments)));

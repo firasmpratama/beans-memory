@@ -1,5 +1,6 @@
 import type { Database } from "bun:sqlite";
 import { createHash } from "node:crypto";
+import { redactSecrets } from "./redact";
 
 export type ObservationInput = {
   sessionID?: string | null;
@@ -23,7 +24,9 @@ export type ObservationRow = {
 };
 
 function hashOf(project: string, title: string, body: string): string {
-  return createHash("sha256").update(`${project}\n${title}\n${body}`).digest("hex");
+  return createHash("sha256")
+    .update(JSON.stringify([project, title, body]))
+    .digest("hex");
 }
 
 function json(value: string[] | undefined): string {
@@ -39,8 +42,7 @@ export function ensureSession(
     `INSERT INTO sessions (id, project, directory, title, started_at)
      VALUES (?, ?, ?, ?, ?)
      ON CONFLICT(id) DO UPDATE SET
-       title = coalesce(excluded.title, sessions.title),
-       ended_at = excluded.started_at`,
+       title = coalesce(excluded.title, sessions.title)`,
     [input.id, input.project, input.directory ?? null, input.title ?? null, now],
   );
 }
@@ -65,7 +67,7 @@ export function addPrompt(
   db: Database,
   input: { sessionID: string; project: string; body: string },
 ): void {
-  const body = input.body.trim().slice(0, 8000);
+  const body = redactSecrets(input.body).trim().slice(0, 8000);
   if (!body) return;
   const now = new Date();
   db.run(
@@ -92,7 +94,8 @@ export function addObservation(
   db.run(
     `INSERT INTO observations
       (session_id, project, type, title, body, files, concepts, source, content_hash, created_at, created_at_epoch)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(content_hash) DO NOTHING`,
     [
       input.sessionID ?? null,
       input.project,
@@ -108,8 +111,11 @@ export function addObservation(
     ],
   );
 
-  const row = db.query<{ id: number }, []>("SELECT last_insert_rowid() AS id").get();
-  return { id: row?.id ?? 0, inserted: true };
+  const changed = db.query<{ n: number }, []>("SELECT changes() AS n").get()?.n ?? 0;
+  const row = db
+    .query<{ id: number }, [string]>("SELECT id FROM observations WHERE content_hash = ?")
+    .get(hash);
+  return { id: row?.id ?? 0, inserted: changed > 0 };
 }
 
 export function recentObservations(
@@ -157,7 +163,8 @@ export function searchObservations(
            LIMIT ?`,
         )
         .all(...params);
-    } catch {
+    } catch (error) {
+      console.error("[memory] pencarian gagal:", error);
       return [];
     }
   };
