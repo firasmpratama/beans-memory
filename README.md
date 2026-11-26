@@ -1,8 +1,6 @@
 <p align="center">
-  <img src="docs/peanut.svg" alt="A golden bean with a small green sprout" width="360">
+  <img src="docs/wordmark.svg" alt="beans-memory" width="520">
 </p>
-
-<h1 align="center">beans-memory</h1>
 
 <p align="center">
   Local, persistent memory for coding agents. One SQLite file. No daemon, no cloud, no account.

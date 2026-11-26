@@ -1,8 +1,6 @@
 <p align="center">
-  <img src="docs/peanut.svg" alt="Biji emas dengan tunas hijau kecil" width="360">
+  <img src="docs/wordmark.svg" alt="beans-memory" width="520">
 </p>
-
-<h1 align="center">beans-memory</h1>
 
 <p align="center">
   Memory lokal dan permanen untuk coding agent. Satu file SQLite. Tanpa daemon, tanpa cloud, tanpa akun.
