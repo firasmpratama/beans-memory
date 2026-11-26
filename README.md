@@ -33,7 +33,7 @@ OpenCode (Bun runtime)
 ## Requirements
 
 - OpenCode 2
-- Bun 1.2+ only if you want the MCP server, the import scripts, or the tests. The plugin itself runs inside OpenCode's bundled Bun, so no install needed for normal use.
+- Bun 1.2+ for the CLI, MCP server, importers, and tests. Not needed for the plugin alone: it runs inside OpenCode's bundled Bun.
   - `curl -fsSL https://bun.sh/install | bash`
 - macOS or Linux. Windows works in theory but is untested.
 
@@ -44,8 +44,10 @@ OpenCode (Bun runtime)
 ```bash
 git clone https://github.com/firasmpratama/beans-memory ~/tools/beans-memory
 cd ~/tools/beans-memory
-bun test   # optional, uses a temporary database
+bun test   # optional, requires Bun; uses a temporary database
 ```
+
+No git? Download the source archive from the Releases page and unpack it anywhere permanent.
 
 2. Create the OpenCode loader:
 
@@ -81,9 +83,19 @@ export default plugin;
 
 Replace `ENTRY` with the real path. Keep the fallback: if the code is on an external drive that is not mounted, OpenCode still starts with memory disabled instead of failing.
 
+The directory name and file name are free-form. OpenCode loads any `.ts` file under `~/.config/opencode/plugins/`.
+
 3. Restart OpenCode.
 
-4. Verify. Ask the agent to call `memory_stats`. It should answer with zero notes on a fresh install.
+4. Verify. Ask the agent to call `memory_stats`. On a fresh install it returns zero notes. If the tool is missing, see Troubleshooting.
+
+Check the loader itself without OpenCode, if Bun is installed:
+
+```bash
+bun -e 'import("/absolute/path/to/beans-memory/src/plugin.ts").then((m) => console.log(typeof m.default.setup))'
+```
+
+It should print `function`. A path or import error here will also break the plugin in OpenCode.
 
 ## Use
 
@@ -258,6 +270,14 @@ bun src/migrate-legacy-db.ts --from /old/memory.db
 - Notes are stored as written. There is no secret redaction for notes. Do not save tokens, passwords, or `.env` contents into a note.
 - Prompts captured automatically are redacted for common secret patterns: OpenAI/GitHub/AWS/Google API keys, Slack/Discord webhooks, and `password=` / `token:` style assignments. Redaction is best effort, not a guarantee, so still avoid pasting secrets into chat.
 - The database is readable by any process running as your user. Treat it like a notes file, not a vault.
+
+## Troubleshooting
+
+- `memory_stats` is missing after restart: check the `ENTRY` path in the loader and run the `bun -e` check above. OpenCode logs loader errors to `~/.local/share/opencode/log/opencode.log`.
+- Plugin silently does nothing: the loader caught an import error, usually because the code lives on an unmounted drive. Mount it and restart.
+- `Cannot use import statement outside a module`: create `~/.config/opencode/plugins/package.json` with `{"type":"module"}`.
+- `database is locked`: another process is writing. Close extra agents or wait; the database uses WAL with a 5 second busy timeout.
+- Permission denied on the database: files are `0600` and the directory `0700` by design. Run as the user that created it.
 
 ## Limitations
 

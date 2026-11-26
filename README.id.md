@@ -33,7 +33,7 @@ OpenCode (runtime Bun)
 ## Kebutuhan
 
 - OpenCode 2
-- Bun 1.2+ hanya kalau mau memakai server MCP, skrip import, atau test. Plugin sendiri berjalan di dalam Bun bawaan OpenCode, jadi tidak perlu instalasi untuk pemakaian normal.
+- Bun 1.2+ untuk CLI, server MCP, importer, dan test. Tidak perlu untuk plugin saja: plugin berjalan di Bun bawaan OpenCode.
   - `curl -fsSL https://bun.sh/install | bash`
 - macOS atau Linux. Windows secara teori bisa, belum diuji.
 
@@ -44,8 +44,10 @@ OpenCode (runtime Bun)
 ```bash
 git clone https://github.com/firasmpratama/beans-memory ~/tools/beans-memory
 cd ~/tools/beans-memory
-bun test   # opsional, memakai database sementara
+bun test   # opsional, butuh Bun; memakai database sementara
 ```
+
+Tidak punya git? Unduh arsip source dari halaman Releases dan ekstrak di lokasi permanen.
 
 2. Buat loader OpenCode:
 
@@ -81,9 +83,19 @@ export default plugin;
 
 Ganti `ENTRY` dengan path sebenarnya. Pertahankan fallback: kalau kode ada di disk eksternal yang tidak ter-mount, OpenCode tetap start dengan memory nonaktif, bukan gagal.
 
+Nama folder dan nama file bebas. OpenCode memuat file `.ts` apa pun di `~/.config/opencode/plugins/`.
+
 3. Restart OpenCode.
 
-4. Verifikasi. Minta agent memanggil `memory_stats`. Di instalasi baru, hasilnya nol catatan.
+4. Verifikasi. Minta agent memanggil `memory_stats`. Di instalasi baru hasilnya nol catatan. Kalau tool tidak muncul, lihat Troubleshooting.
+
+Cek loader tanpa OpenCode, kalau Bun terpasang:
+
+```bash
+bun -e 'import("/path/absolut/ke/beans-memory/src/plugin.ts").then((m) => console.log(typeof m.default.setup))'
+```
+
+Hasilnya harus `function`. Error path atau import di sini juga akan membuat plugin gagal di OpenCode.
 
 ## Pemakaian
 
@@ -258,6 +270,14 @@ bun src/migrate-legacy-db.ts --from /lama/memory.db
 - Catatan disimpan apa adanya. Tidak ada redaksi rahasia pada catatan. Jangan simpan token, password, atau isi `.env` ke dalam catatan.
 - Prompt yang ditangkap otomatis diredaksi untuk pola rahasia umum: API key OpenAI/GitHub/AWS/Google, webhook Slack/Discord, dan pola `password=` / `token:`. Redaksi ini tidak lengkap, jadi tetap jangan menempelkan rahasia ke chat.
 - Database bisa dibaca proses apa pun yang berjalan sebagai user kamu. Perlakukan seperti file catatan, bukan vault.
+
+## Troubleshooting
+
+- `memory_stats` tidak muncul setelah restart: cek path `ENTRY` di loader dan jalankan pengecekan `bun -e` di atas. OpenCode mencatat error loader di `~/.local/share/opencode/log/opencode.log`.
+- Plugin diam saja: loader menangkap error import, biasanya karena kode ada di disk yang tidak ter-mount. Mount lalu restart.
+- `Cannot use import statement outside a module`: buat `~/.config/opencode/plugins/package.json` berisi `{"type":"module"}`.
+- `database is locked`: ada proses lain yang menulis. Tutup agent lain atau tunggu; database memakai WAL dengan busy timeout 5 detik.
+- Permission denied pada database: file `0600` dan folder `0700` memang disengaja. Jalankan sebagai user yang membuatnya.
 
 ## Keterbatasan
 
