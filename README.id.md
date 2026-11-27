@@ -294,6 +294,7 @@ bun src/migrate-legacy-db.ts --from /lama/memory.db
 - Catatan disimpan apa adanya. Tidak ada redaksi rahasia pada catatan. Jangan simpan token, password, atau isi `.env` ke dalam catatan.
 - Prompt yang ditangkap otomatis diredaksi untuk pola rahasia umum: API key OpenAI/GitHub/AWS/Google, webhook Slack/Discord, dan pola `password=` / `token:`. Redaksi ini tidak lengkap, jadi tetap jangan menempelkan rahasia ke chat.
 - Database bisa dibaca proses apa pun yang berjalan sebagai user kamu. Perlakukan seperti file catatan, bukan vault.
+- Laporkan kerentanan lewat [pelaporan privat GitHub](https://github.com/firasmpratama/beans-memory/security/advisories/new), bukan issue publik. Lihat [SECURITY.md](.github/SECURITY.md) untuk isi laporan.
 
 ## Troubleshooting
 
@@ -311,6 +312,17 @@ bun src/migrate-legacy-db.ts --from /lama/memory.db
 - Identitas project adalah basename working directory. Dua repo berbeda dengan nama folder sama akan berbagi catatan, kecuali kamu set `MEMORY_PROJECT`.
 - Satu pengguna, satu mesin. Tanpa sinkronisasi.
 - SQLite diakses oleh proses plugin dan proses MCP. Mode WAL plus busy timeout 5 detik menangani itu; penulisan konkuren berat bukan target desain.
+
+## Development
+
+Install dependency dev sekali, lalu pakai script:
+
+```bash
+bun install
+bun test
+bun run typecheck
+bun run test:coverage
+```
 
 ## Struktur
 
@@ -336,3 +348,7 @@ test/                       bun test: repo, edge, time, MCP, CLI, redaksi
 1. Hapus `~/.config/opencode/plugins/memory/`.
 2. Hapus entri `beans_memory` dari `opencode.json` kalau pernah ditambahkan.
 3. Hapus `~/.local/share/beans-memory/` kalau catatan tidak ingin disimpan.
+
+## Lisensi
+
+MIT. Lihat [LICENSE](LICENSE).

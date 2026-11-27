@@ -294,6 +294,7 @@ bun src/migrate-legacy-db.ts --from /old/memory.db
 - Notes are stored as written. There is no secret redaction for notes. Do not save tokens, passwords, or `.env` contents into a note.
 - Prompts captured automatically are redacted for common secret patterns: OpenAI/GitHub/AWS/Google API keys, Slack/Discord webhooks, and `password=` / `token:` style assignments. Redaction is best effort, not a guarantee, so still avoid pasting secrets into chat.
 - The database is readable by any process running as your user. Treat it like a notes file, not a vault.
+- Report vulnerabilities through [GitHub private vulnerability reporting](https://github.com/firasmpratama/beans-memory/security/advisories/new), not a public issue. See [SECURITY.md](.github/SECURITY.md) for what to include.
 
 ## Troubleshooting
 
@@ -311,6 +312,17 @@ bun src/migrate-legacy-db.ts --from /old/memory.db
 - Project identity is the working-directory basename. Two unrelated repositories with the same folder name share notes unless you set `MEMORY_PROJECT`.
 - Single user, single machine. No sync.
 - SQLite is accessed by the plugin process and the MCP process. WAL mode plus a 5 second busy timeout handles that; heavy concurrent writes are not a design goal.
+
+## Development
+
+Install the dev dependencies once, then use the scripts:
+
+```bash
+bun install
+bun test
+bun run typecheck
+bun run test:coverage
+```
 
 ## Layout
 
@@ -336,3 +348,7 @@ test/                       bun test: repo, edges, time, MCP, CLI, redaction
 1. Remove `~/.config/opencode/plugins/memory/`.
 2. Remove the `beans_memory` entry from `opencode.json` if you added it.
 3. Delete `~/.local/share/beans-memory/` if you do not want to keep the notes.
+
+## License
+
+MIT. See [LICENSE](LICENSE).
