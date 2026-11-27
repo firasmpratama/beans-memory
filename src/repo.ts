@@ -29,6 +29,10 @@ function hashOf(project: string, title: string, body: string): string {
     .digest("hex");
 }
 
+export function observationHash(project: string, title: string, body: string): string {
+  return hashOf(project, title.trim().slice(0, 300), (body ?? "").trim().slice(0, 20000));
+}
+
 function json(value: string[] | undefined): string {
   return JSON.stringify(value ?? []);
 }
@@ -55,7 +59,8 @@ export function touchSessionFiles(db: Database, sessionID: string, files: string
   if (!row) return;
   let existing: string[] = [];
   try {
-    existing = JSON.parse(row.files);
+    const parsed = JSON.parse(row.files);
+    if (Array.isArray(parsed)) existing = parsed.map(String);
   } catch {
     existing = [];
   }
@@ -83,8 +88,18 @@ export function addObservation(
   const title = input.title.trim().slice(0, 300);
   const body = (input.body ?? "").trim().slice(0, 20000);
   if (!title) throw new Error("title is required");
-  const created = input.createdAt ? new Date(input.createdAt) : new Date();
-  const hash = hashOf(input.project, title, body);
+  const rawCreatedAt = input.createdAt as string | null | undefined;
+  if (
+    rawCreatedAt === null ||
+    (typeof rawCreatedAt === "string" && rawCreatedAt.trim() === "")
+  ) {
+    throw new Error(`createdAt tidak valid: ${String(rawCreatedAt)}`);
+  }
+  const created = rawCreatedAt === undefined ? new Date() : new Date(rawCreatedAt);
+  if (Number.isNaN(created.getTime())) {
+    throw new Error(`createdAt tidak valid: ${rawCreatedAt}`);
+  }
+  const hash = observationHash(input.project, title, body);
 
   const existing = db
     .query<{ id: number }, [string]>("SELECT id FROM observations WHERE content_hash = ?")
@@ -123,6 +138,8 @@ export function recentObservations(
   project: string,
   limit = 8,
 ): ObservationRow[] {
+  const requested = typeof limit === "number" && Number.isFinite(limit) ? limit : 8;
+  const bounded = Math.min(Math.max(Math.trunc(requested), 1), 200);
   return db
     .query<ObservationRow, [string, number]>(
       `SELECT id, created_at, type, title, files
@@ -131,7 +148,7 @@ export function recentObservations(
        ORDER BY created_at_epoch DESC
        LIMIT ?`,
     )
-    .all(project, limit);
+    .all(project, bounded);
 }
 
 function tokensOf(query: string): string[] {
@@ -142,7 +159,8 @@ export function searchObservations(
   db: Database,
   input: { project: string; query: string; limit?: number; type?: string },
 ): ObservationRow[] {
-  const limit = Math.min(Math.max(input.limit ?? 10, 1), 50);
+  const requested = typeof input.limit === "number" && Number.isFinite(input.limit) ? input.limit : 10;
+  const limit = Math.min(Math.max(Math.trunc(requested), 1), 50);
   const tokens = tokensOf(input.query);
   if (tokens.length === 0) return recentObservations(db, input.project, limit);
 

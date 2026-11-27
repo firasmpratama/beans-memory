@@ -16,3 +16,11 @@ export function localDate(iso: string): string {
   if (Number.isNaN(value.getTime())) return iso.slice(0, 10);
   return dateOnly.format(value);
 }
+
+export function normalizeIsoDate(value: unknown): string | undefined | null {
+  if (value === undefined) return undefined;
+  if (value === null) return null;
+  const date =
+    typeof value === "number" ? new Date(value) : new Date(String(value).trim());
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}

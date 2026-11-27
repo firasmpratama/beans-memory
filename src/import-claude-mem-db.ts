@@ -3,6 +3,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { openDb, resolveDbPath } from "./db";
 import { addObservation, stats } from "./repo";
+import { normalizeIsoDate } from "./time";
 
 const args = process.argv.slice(2);
 function arg(name: string, fallback: string): string {
@@ -58,7 +59,7 @@ const rows = source
       facts: string | null;
       concepts: string | null;
       files_modified: string | null;
-      created_at: string;
+      created_at: unknown;
     },
     []
   >(
@@ -68,13 +69,13 @@ const rows = source
   .all();
 
 const db = dryRun ? null : openDb(dbPath);
-const perProject = new Map<string, { inserted: number; dup: number; skipped: number }>();
+const perProject = new Map<string, { inserted: number; dup: number; skipped: number; failed: number }>();
 
 for (const row of rows) {
   const project = normalizeProject(row.project);
   if (onlyProject && project !== onlyProject) continue;
 
-  const entry = perProject.get(project) ?? { inserted: 0, dup: 0, skipped: 0 };
+  const entry = perProject.get(project) ?? { inserted: 0, dup: 0, skipped: 0, failed: 0 };
   perProject.set(project, entry);
 
   const type = (row.type ?? "note").toLowerCase();
@@ -92,23 +93,35 @@ for (const row of rows) {
     .join("\n\n")
     .trim();
 
+  const createdAt = normalizeIsoDate(row.created_at);
+  if (createdAt === null) {
+    entry.failed += 1;
+    console.error("gagal: createdAt tidak valid");
+    continue;
+  }
+
   if (dryRun || !db) {
     entry.inserted += 1;
     continue;
   }
 
-  const result = addObservation(db, {
-    project,
-    type,
-    title: row.title ?? row.subtitle ?? "Tanpa judul",
-    body,
-    files: parseArray(row.files_modified),
-    concepts: parseArray(row.concepts),
-    source: "import",
-    createdAt: row.created_at,
-  });
-  if (result.inserted) entry.inserted += 1;
-  else entry.dup += 1;
+  try {
+    const result = addObservation(db, {
+      project,
+      type,
+      title: row.title ?? row.subtitle ?? "Tanpa judul",
+      body,
+      files: parseArray(row.files_modified),
+      concepts: parseArray(row.concepts),
+      source: "import",
+      createdAt,
+    });
+    if (result.inserted) entry.inserted += 1;
+    else entry.dup += 1;
+  } catch (error) {
+    entry.failed += 1;
+    console.error("gagal:", error instanceof Error ? error.message : error);
+  }
 }
 
 source.close();

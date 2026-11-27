@@ -1,6 +1,7 @@
 import { Database } from "bun:sqlite";
 import { openDb, resolveDbPath } from "./db";
 import { addObservation } from "./repo";
+import { normalizeIsoDate } from "./time";
 
 const args = process.argv.slice(2);
 function arg(name: string, fallback: string): string {
@@ -31,7 +32,7 @@ const rows = source
       files: string;
       concepts: string;
       source: string;
-      created_at: string;
+      created_at: unknown;
     },
     []
   >(
@@ -51,22 +52,32 @@ function parseArray(value: string): string[] {
 
 let inserted = 0;
 let dup = 0;
+let failed = 0;
 for (const row of rows) {
-  const result = addObservation(target, {
-    project: row.project,
-    type: row.type,
-    title: row.title,
-    body: row.body ?? "",
-    files: parseArray(row.files),
-    concepts: parseArray(row.concepts),
-    source: row.source === "agent" ? "agent" : "import",
-    createdAt: row.created_at,
-  });
-  if (result.inserted) inserted += 1;
-  else dup += 1;
+  try {
+    const createdAt = normalizeIsoDate(row.created_at);
+    if (createdAt === null) {
+      throw new Error("createdAt tidak valid");
+    }
+    const result = addObservation(target, {
+      project: row.project,
+      type: row.type,
+      title: row.title,
+      body: row.body ?? "",
+      files: parseArray(row.files),
+      concepts: parseArray(row.concepts),
+      source: row.source === "agent" ? "agent" : "import",
+      createdAt,
+    });
+    if (result.inserted) inserted += 1;
+    else dup += 1;
+  } catch (error) {
+    failed += 1;
+    console.error("gagal:", error instanceof Error ? error.message : error);
+  }
 }
 
 source.close();
 target.close();
 
-console.log(JSON.stringify({ from: fromPath, to: dbPath, rows: rows.length, inserted, dup }, null, 2));
+console.log(JSON.stringify({ from: fromPath, to: dbPath, rows: rows.length, inserted, dup, failed }, null, 2));

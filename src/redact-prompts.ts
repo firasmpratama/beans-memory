@@ -1,27 +1,29 @@
+import type { Database } from "bun:sqlite";
 import { openDb, resolveDbPath } from "./db";
 import { redactSecrets } from "./redact";
 
-const db = openDb(process.argv[2] ?? resolveDbPath());
+export function redactPromptRows(db: Database): { scanned: number; redacted: number } {
+  const rows = db
+    .query<{ id: number; body: string }, []>("SELECT id, body FROM prompts")
+    .all();
 
-const rows = db
-  .query<{ id: number; body: string }, []>("SELECT id, body FROM prompts")
-  .all();
+  let redacted = 0;
+  db.transaction(() => {
+    for (const row of rows) {
+      const next = redactSecrets(row.body);
+      if (next === row.body) continue;
+      db.run("UPDATE prompts SET body = ? WHERE id = ?", [next, row.id]);
+      redacted += 1;
+    }
+  })();
 
-let updated = 0;
-db.transaction(() => {
-  for (const row of rows) {
-    const next = redactSecrets(row.body);
-    if (next === row.body) continue;
-    db.run("UPDATE prompts SET body = ? WHERE id = ?", [next, row.id]);
-    updated += 1;
-  }
-})();
+  return { scanned: rows.length, redacted };
+}
 
-console.log(
-  JSON.stringify(
-    { db: process.argv[2] ?? resolveDbPath(), scanned: rows.length, redacted: updated },
-    null,
-    2,
-  ),
-);
-db.close();
+if (import.meta.main) {
+  const dbPath = process.argv[2] ?? resolveDbPath();
+  const db = openDb(dbPath);
+  const report = redactPromptRows(db);
+  console.log(JSON.stringify({ db: dbPath, ...report }, null, 2));
+  db.close();
+}

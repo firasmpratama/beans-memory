@@ -67,6 +67,23 @@ describe("cli", () => {
     expect(parsed.observations).toBeGreaterThanOrEqual(2);
   });
 
+  test("bounds zero, negative, fractional, and very large result limits", () => {
+    for (const title of ["Boundary marker one", "Boundary marker two", "Boundary marker three"]) {
+      const saved = run(["note", "--title", title, "--body", "boundsentinel"]);
+      expect(saved.code).toBe(0);
+    }
+
+    const zero = run(["search", "boundsentinel", "--limit", "0", "--json"]);
+    const negative = run(["search", "boundsentinel", "--limit=-5", "--json"]);
+    const fractional = run(["search", "boundsentinel", "--limit", "2.9", "--json"]);
+    const huge = run(["search", "boundsentinel", "--limit", "999999999", "--json"]);
+
+    expect(JSON.parse(zero.out)).toHaveLength(1);
+    expect(JSON.parse(negative.out)).toHaveLength(1);
+    expect(JSON.parse(fractional.out)).toHaveLength(2);
+    expect(JSON.parse(huge.out)).toHaveLength(3);
+  });
+
   test("unknown command exits non-zero", () => {
     const result = run(["--tidak-ada"]);
     expect(result.code).not.toBe(0);

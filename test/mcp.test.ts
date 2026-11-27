@@ -15,7 +15,9 @@ type RpcResponse = {
     serverInfo?: { name: string; version: string };
     tools?: Array<{ name: string }>;
     content?: Array<{ type: string; text: string }>;
+    isError?: boolean;
   };
+  error?: { code: number; message: string };
 };
 
 describe("MCP stdio server", () => {
@@ -83,6 +85,10 @@ describe("MCP stdio server", () => {
 
     let exit: unknown[];
     try {
+      child.stdin.write("not-json\n");
+      const malformed = JSON.parse(await nextLine()) as RpcResponse;
+      expect(malformed.error).toEqual({ code: -32700, message: "Parse error" });
+
       const initialized = await request(1, "initialize", {
         protocolVersion: "2024-11-05",
         capabilities: {},
@@ -93,6 +99,12 @@ describe("MCP stdio server", () => {
       expect(initialized.result?.protocolVersion).toBe("2024-11-05");
       expect(initialized.result?.serverInfo?.name).toBe("beans-memory");
 
+      const unknownMethod = await request(20, "method/not-found");
+      expect(unknownMethod.error).toEqual({
+        code: -32601,
+        message: "Method not found: method/not-found",
+      });
+
       const tools = await request(2, "tools/list");
       expect(tools.result?.tools?.map((tool) => tool.name)).toContain("memory_note");
       expect(tools.result?.tools?.map((tool) => tool.name)).toContain("memory_search");
@@ -100,6 +112,13 @@ describe("MCP stdio server", () => {
       child.stdin.write(
         `${JSON.stringify({ jsonrpc: "2.0", method: "notifications/initialized" })}\n`,
       );
+
+      const unknownTool = await request(21, "tools/call", {
+        name: "tool/not-found",
+        arguments: {},
+      });
+      expect(unknownTool.result?.isError).toBe(true);
+      expect(unknownTool.result?.content?.[0]?.text).toContain("Tool tidak dikenal");
 
       const note = await request(3, "tools/call", {
         name: "memory_note",

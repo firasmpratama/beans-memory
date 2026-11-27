@@ -9,7 +9,6 @@
 <p align="center">
   <a href="https://github.com/firasmpratama/beans-memory/tags"><img src="https://img.shields.io/github/v/tag/firasmpratama/beans-memory" alt="Latest tag"></a>
   <a href="https://www.npmjs.com/package/beans-memory"><img src="https://img.shields.io/npm/v/beans-memory" alt="npm version"></a>
-  <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/firasmpratama/beans-memory/main/coverage.json" alt="coverage">
   <a href="LICENSE"><img src="https://img.shields.io/github/license/firasmpratama/beans-memory" alt="License: MIT"></a>
   <a href="https://github.com/firasmpratama/beans-memory/stargazers"><img src="https://img.shields.io/github/stars/firasmpratama/beans-memory" alt="GitHub stars"></a>
   <img src="https://img.shields.io/github/last-commit/firasmpratama/beans-memory" alt="Last commit">
@@ -64,10 +63,20 @@ OpenCode (Bun runtime)
 
 ## Requirements
 
-- OpenCode 2
-- Bun 1.2+ for the CLI, MCP server, importers, and tests. Not needed for the plugin alone: it runs inside OpenCode's bundled Bun.
+- One supported client:
+  - OpenCode 2 to use the plugin (hooks and in-process tools).
+  - Any stdio MCP client to use the MCP server: Claude Code, Codex, Gemini CLI, Hermes Agent, or another client.
+- Bun 1.2+ for the CLI, MCP server, installer, importers, and tests. The OpenCode plugin runs inside OpenCode's bundled Bun.
   - `curl -fsSL https://bun.sh/install | bash` on macOS/Linux, or `powershell -c "irm bun.sh/install.ps1 | iex"` on Windows.
 - macOS, Linux, or Windows.
+
+### Platform status
+
+- macOS: tested locally.
+- Linux: POSIX paths are supported, but there is no CI matrix yet.
+- Windows: implemented, but not tested on a real Windows machine yet.
+
+If Windows or Linux breaks, open an issue: https://github.com/firasmpratama/beans-memory/issues. If you can fix it, send a pull request (merge request): https://github.com/firasmpratama/beans-memory/pulls.
 
 ## Quick start from source
 
@@ -368,10 +377,11 @@ bun install
 bun test
 bun run typecheck
 bun run test:coverage
-bun run coverage:badge
 ```
 
-`coverage:badge` regenerates `coverage.json`, which feeds the coverage badge. Commit it when the number changes.
+Every file in `src/` has at least one test, including the CLI and script entrypoints. Run `bun test` for the current count.
+
+`bun run test:coverage` uses Bun's in-process coverage. CLI, MCP, and importer tests spawn child processes, so those files do not appear in the coverage table. Treat the percentage as partial module coverage, not whole-project coverage.
 
 ## Layout
 
@@ -390,7 +400,7 @@ src/import-claude-mem-db.ts import observations from claude-mem
 src/import-claude-mem-extras.ts import summaries and prompts
 src/migrate-legacy-db.ts    copy an older beans-memory database
 skills/beans-memory/        agent skill for the CLI
-test/                       bun test: repo, edges, time, MCP, CLI, redaction
+test/                       bun test: repo, edges, plugin, imports, installer, artifacts, rehash, time, MCP, CLI, redaction
 ```
 
 ## Uninstall

@@ -1,52 +1,52 @@
 ---
-name: Beans Memory
-description: Cari catatan proyek yang tersimpan dan simpan keputusan atau bugfix baru ke memory lokal. Gunakan sebelum mulai pekerjaan yang mungkin pernah dikerjakan, dan setelah tugas yang menghasilkan keputusan, bugfix, atau wiring yang sulit ditemukan lagi.
+name: beans-memory
+description: Find saved project notes and store new decisions or bugfixes in local memory. Use before starting work that may have been done before, and after a task that produced a decision, bugfix, or wiring that is hard to rediscover.
 metadata:
   opencode/autoinvoke: true
 ---
 
 # Beans Memory
 
-Memory lokal berbasis SQLite. Tidak ada cloud, tidak ada akun.
+Local SQLite memory. No cloud, no account.
 
-CLI: `beans-memory`. Kalau perintah tidak tersedia, pakai `bunx beans-memory` (paket npm) atau `bun src/cli.ts` dari repo.
+CLI: `beans-memory`. If the command is not available, use `bunx beans-memory` (npm package) or `bun src/cli.ts` from the repository.
 
-## Sebelum mulai
+## Before starting
 
-Cari dulu apakah topik ini pernah dikerjakan:
+Search first to see whether the topic was already handled:
 
 ```bash
-beans-memory search "kata kunci topik" --limit 5
+beans-memory search "topic keywords" --limit 5
 ```
 
-Kalau ada hasil relevan, buka isinya:
+If there are relevant results, open their bodies:
 
 ```bash
 beans-memory get <id> [<id>...]
 ```
 
-Gunakan `--json` kalau perlu memproses hasil secara terstruktur.
+Use `--json` when the result needs structured processing.
 
-## Setelah tugas
+## After a task
 
-Simpan satu catatan ringkas untuk keputusan, bugfix, aturan bisnis, atau wiring yang tidak jelas dari kode:
+Save one short note for a decision, bugfix, business rule, or wiring that is not obvious from the code:
 
 ```bash
 beans-memory note \
-  --title "Judul satu baris" \
+  --title "One-line title" \
   --type decision \
-  --files "app/Contoh.php,app/Lain.php" \
+  --files "app/Example.php,app/Other.php" \
   --stdin <<'EOF'
-Apa yang berubah, kenapa, dan bagian mana yang perlu diingat.
+What changed, why, and which parts need to be remembered.
 EOF
 ```
 
-Tipe yang tersedia: `decision`, `bugfix`, `feature`, `refactor`, `security_note`, `note`.
+Available types: `decision`, `bugfix`, `feature`, `refactor`, `security_note`, `note`.
 
-## Aturan
+## Rules
 
-- Satu catatan satu fakta. Jangan menulis ringkasan panjang.
-- Sertakan alasan keputusan, bukan hanya perubahan.
-- Jangan simpan token, password, isi `.env`, atau data pribadi.
-- Project ditentukan dari nama folder kerja. Gunakan `--project <nama>` kalau perlu memisahkan.
-- Cek `beans-memory stats` untuk melihat jumlah catatan project ini.
+- One note, one fact. Do not write a long summary.
+- Include the reason behind a decision, not only the change.
+- Never save tokens, passwords, `.env` contents, or personal data.
+- The project is derived from the working directory name. Use `--project <name>` when notes must be separated.
+- Run `beans-memory stats` to see the note count for this project.

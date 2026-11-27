@@ -6,9 +6,12 @@ import { join } from "node:path";
 import { openDb } from "../src/db";
 import {
   addObservation,
+  addPrompt,
+  ensureSession,
   getObservations,
   recentObservations,
   searchObservations,
+  touchSessionFiles,
 } from "../src/repo";
 
 const project = "repo-edge";
@@ -206,5 +209,106 @@ describe("observation query edge cases", () => {
 
   test("returns an empty list when getObservations receives unknown ids", () => {
     expect(getObservations(db, [999999])).toEqual([]);
+  });
+
+  test("rejects an invalid createdAt instead of storing a corrupt date", () => {
+    expect(() =>
+      addObservation(db, {
+        project,
+        title: "Invalid date",
+        body: "x",
+        createdAt: "not-a-date",
+      }),
+    ).toThrow("createdAt tidak valid");
+
+    expect(() =>
+      addObservation(db, {
+        project,
+        title: "Empty date",
+        body: "x",
+        createdAt: "",
+      }),
+    ).toThrow("createdAt tidak valid");
+
+    expect(() =>
+      addObservation(db, {
+        project,
+        title: "Null date",
+        body: "x",
+        createdAt: null as unknown as string,
+      }),
+    ).toThrow("createdAt tidak valid");
+  });
+
+  test("ignores malformed session file payloads", () => {
+    ensureSession(db, { id: "ses_bad", project });
+    db.run("UPDATE sessions SET files = ? WHERE id = ?", ['{"file":"a"}', "ses_bad"]);
+
+    expect(() => touchSessionFiles(db, "ses_bad", ["src/a.ts"])).not.toThrow();
+
+    const stored = db
+      .query<{ files: string }, [string]>("SELECT files FROM sessions WHERE id = ?")
+      .get("ses_bad");
+    expect(JSON.parse(stored!.files)).toEqual(["src/a.ts"]);
+  });
+
+  test("falls back to default limits for non-finite values", () => {
+    addObservation(db, { project, title: "Limit one", body: "limitkeyword" });
+    addObservation(db, { project, title: "Limit two", body: "limitkeyword" });
+
+    expect(
+      searchObservations(db, { project, query: "limitkeyword", limit: Number.NaN }),
+    ).toHaveLength(2);
+    expect(recentObservations(db, project, Number.NaN)).toHaveLength(2);
+  });
+
+  test("truncates oversized observation and prompt data and retains last 200 files", () => {
+    const longTitle = `${"T".repeat(300)}x`;
+    const longBody = `${"B".repeat(20000)}x`;
+    const first = addObservation(db, {
+      project,
+      title: longTitle,
+      body: longBody,
+      createdAt: "2026-01-01T00:00:00.000Z",
+    });
+    const replay = addObservation(db, {
+      project,
+      title: `${"T".repeat(300)}y`,
+      body: `${"B".repeat(20000)}y`,
+      createdAt: "2026-01-02T00:00:00.000Z",
+    });
+    ensureSession(db, { id: "ses_limits", project });
+    addPrompt(db, { sessionID: "ses_limits", project, body: "P".repeat(8001) });
+    const files = Array.from({ length: 205 }, (_, index) => `src/file-${index}.ts`);
+    touchSessionFiles(db, "ses_limits", files);
+
+    const observation = getObservations(db, [first.id])[0]!;
+    const prompt = db.query<{ body: string }, []>("SELECT body FROM prompts").get()!;
+    const storedFiles = db
+      .query<{ files: string }, [string]>("SELECT files FROM sessions WHERE id = ?")
+      .get("ses_limits")!;
+
+    expect(replay).toEqual({ id: first.id, inserted: false });
+    expect(observation.title).toHaveLength(300);
+    expect(observation.body).toHaveLength(20000);
+    expect(prompt.body).toHaveLength(8000);
+    expect(JSON.parse(storedFiles.files)).toHaveLength(200);
+    expect(JSON.parse(storedFiles.files)[0]).toBe("src/file-5.ts");
+    expect(JSON.parse(storedFiles.files).at(-1)).toBe("src/file-204.ts");
+  });
+
+  test("caps search results at 50 and recent results at 200", () => {
+    for (let index = 0; index < 205; index += 1) {
+      addObservation(db, {
+        project,
+        title: `Limit boundary ${index}`,
+        body: "cappedquerytoken",
+        createdAt: new Date(Date.UTC(2026, 0, 1, 0, index)).toISOString(),
+      });
+    }
+
+    expect(searchObservations(db, { project, query: "cappedquerytoken", limit: 999 }).length).toBe(50);
+    expect(recentObservations(db, project, 999).length).toBe(200);
+    expect(recentObservations(db, project, 0).length).toBe(1);
   });
 });

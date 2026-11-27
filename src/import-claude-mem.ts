@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { basename } from "node:path";
 import { openDb } from "./db";
 import { addObservation, stats } from "./repo";
+import { normalizeIsoDate } from "./time";
 
 type Row = {
   id?: number;
@@ -14,7 +15,7 @@ type Row = {
   concepts?: string;
   files_modified?: string;
   files_read?: string;
-  created_at?: string;
+  created_at?: unknown;
   source?: string;
 };
 
@@ -61,7 +62,7 @@ function parseArray(value: string | undefined): string[] {
 
 const lines = readFileSync(jsonlPath, "utf8").split("\n").filter(Boolean);
 
-const db = openDb(dbPath);
+const db = dryRun ? null : openDb(dbPath);
 let inserted = 0;
 let skippedType = 0;
 let skippedDup = 0;
@@ -92,7 +93,14 @@ for (const line of lines) {
     .join("\n\n")
     .trim();
 
-  if (dryRun) {
+  const createdAt = normalizeIsoDate(row.created_at);
+  if (createdAt === null) {
+    failed += 1;
+    console.error("gagal: createdAt tidak valid");
+    continue;
+  }
+
+  if (dryRun || !db) {
     inserted += 1;
     continue;
   }
@@ -106,7 +114,7 @@ for (const line of lines) {
       files: parseArray(row.files_modified),
       concepts: parseArray(row.concepts),
       source: "import",
-      createdAt: row.created_at,
+      createdAt,
     });
     if (result.inserted) inserted += 1;
     else skippedDup += 1;
@@ -127,11 +135,11 @@ console.log(
       skippedDup,
       failed,
       dryRun,
-      stats: dryRun ? null : stats(db, project),
+      stats: db ? stats(db, project) : null,
     },
     null,
     2,
   ),
 );
 
-db.close();
+if (db) db.close();

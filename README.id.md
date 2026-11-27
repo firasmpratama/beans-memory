@@ -9,7 +9,6 @@
 <p align="center">
   <a href="https://github.com/firasmpratama/beans-memory/tags"><img src="https://img.shields.io/github/v/tag/firasmpratama/beans-memory" alt="Tag terbaru"></a>
   <a href="https://www.npmjs.com/package/beans-memory"><img src="https://img.shields.io/npm/v/beans-memory" alt="Versi npm"></a>
-  <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/firasmpratama/beans-memory/main/coverage.json" alt="coverage">
   <a href="LICENSE"><img src="https://img.shields.io/github/license/firasmpratama/beans-memory" alt="Lisensi: MIT"></a>
   <a href="https://github.com/firasmpratama/beans-memory/stargazers"><img src="https://img.shields.io/github/stars/firasmpratama/beans-memory" alt="GitHub stars"></a>
   <img src="https://img.shields.io/github/last-commit/firasmpratama/beans-memory" alt="Commit terakhir">
@@ -64,10 +63,20 @@ OpenCode (runtime Bun)
 
 ## Kebutuhan
 
-- OpenCode 2
-- Bun 1.2+ untuk CLI, server MCP, importer, dan test. Tidak perlu untuk plugin saja: plugin berjalan di Bun bawaan OpenCode.
+- Salah satu klien:
+  - OpenCode 2 untuk memakai plugin (hook dan tool in-process).
+  - Klien stdio MCP apa pun untuk memakai server MCP: Claude Code, Codex, Gemini CLI, Hermes Agent, atau klien lain.
+- Bun 1.2+ untuk CLI, server MCP, installer, importer, dan test. Plugin OpenCode berjalan di Bun bawaan OpenCode.
   - `curl -fsSL https://bun.sh/install | bash` di macOS/Linux, atau `powershell -c "irm bun.sh/install.ps1 | iex"` di Windows.
 - macOS, Linux, atau Windows.
+
+### Status platform
+
+- macOS: sudah dites lokal.
+- Linux: path POSIX didukung, tapi belum ada CI matrix.
+- Windows: sudah diimplementasikan, tapi belum dites di mesin Windows sungguhan.
+
+Kalau Windows atau Linux bermasalah, buka issue: https://github.com/firasmpratama/beans-memory/issues. Kalau bisa memperbaiki, kirim pull request (merge request): https://github.com/firasmpratama/beans-memory/pulls.
 
 ## Mulai cepat dari source
 
@@ -368,10 +377,11 @@ bun install
 bun test
 bun run typecheck
 bun run test:coverage
-bun run coverage:badge
 ```
 
-`coverage:badge` membuat ulang `coverage.json`, sumber badge coverage. Commit file itu saat angkanya berubah.
+Setiap file di `src/` punya minimal satu test, termasuk entrypoint CLI dan script. Jalankan `bun test` untuk jumlah terbaru.
+
+`bun run test:coverage` memakai coverage in-process Bun. Test CLI, MCP, dan importer menjalankan proses anak, jadi file-file itu tidak muncul di tabel coverage. Anggap persentasenya sebagai coverage sebagian modul, bukan coverage seluruh proyek.
 
 ## Struktur
 
@@ -390,7 +400,7 @@ src/import-claude-mem-db.ts import observasi dari claude-mem
 src/import-claude-mem-extras.ts import ringkasan dan prompt
 src/migrate-legacy-db.ts    salin database beans-memory versi lama
 skills/beans-memory/        skill agent untuk CLI
-test/                       bun test: repo, edge, time, MCP, CLI, redaksi
+test/                       bun test: repo, edge, plugin, import, installer, artifact, rehash, time, MCP, CLI, redaksi
 ```
 
 ## Uninstall
