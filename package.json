@@ -4,6 +4,7 @@
   "description": "Local persistent memory for OpenCode and other coding agents: SQLite + FTS5 plugin, MCP server, and CLI",
   "type": "module",
   "license": "MIT",
+  "author": "Firas <firasmpratama@gmail.com> (https://github.com/firasmpratama)",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/firasmpratama/beans-memory.git"

@@ -1,0 +1,94 @@
+name: Bug report
+description: Report a reproducible problem with beans-memory.
+title: "[bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting. Remove tokens, API keys, passwords, and `.env` contents from logs before posting.
+        For security vulnerabilities, use private vulnerability reporting instead of this form.
+  - type: input
+    id: version
+    attributes:
+      label: beans-memory version
+      description: Use `bunx npm view beans-memory version` or the version in package.json.
+      placeholder: 0.1.6
+    validations:
+      required: true
+  - type: dropdown
+    id: client
+    attributes:
+      label: Client
+      options:
+        - OpenCode 2
+        - Claude Code
+        - Codex
+        - Gemini CLI
+        - Hermes Agent
+        - CLI only
+        - Other
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - macOS
+        - Linux
+        - Windows
+        - WSL
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: bun
+    attributes:
+      label: Bun version
+      description: Output of `bun --version`.
+      placeholder: 1.3.14
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Provide the smallest sequence that triggers the problem.
+      placeholder: |
+        1. Run ...
+        2. Call ...
+        3. See ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: Include the error message, not a summary.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or screenshots
+      description: Redact secrets before posting.
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and this is not a duplicate.
+          required: true
+        - label: I removed secrets from logs, screenshots, and text.
+          required: true
+        - label: I can reproduce this on the latest version.
+          required: true

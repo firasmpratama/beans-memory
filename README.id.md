@@ -383,6 +383,8 @@ Setiap file di `src/` punya minimal satu test, termasuk entrypoint CLI dan scrip
 
 `bun run test:coverage` memakai coverage in-process Bun. Test CLI, MCP, dan importer menjalankan proses anak, jadi file-file itu tidak muncul di tabel coverage. Anggap persentasenya sebagai coverage sebagian modul, bukan coverage seluruh proyek.
 
+Lihat [CONTRIBUTING.md](CONTRIBUTING.md) untuk setup dan aturan review, serta [CHANGELOG.md](CHANGELOG.md) untuk riwayat rilis.
+
 ## Struktur
 
 ```

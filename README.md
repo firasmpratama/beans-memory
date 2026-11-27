@@ -383,6 +383,8 @@ Every file in `src/` has at least one test, including the CLI and script entrypo
 
 `bun run test:coverage` uses Bun's in-process coverage. CLI, MCP, and importer tests spawn child processes, so those files do not appear in the coverage table. Treat the percentage as partial module coverage, not whole-project coverage.
 
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and review rules, and [CHANGELOG.md](CHANGELOG.md) for release history.
+
 ## Layout
 
 ```
