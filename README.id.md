@@ -7,6 +7,16 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/firasmpratama/beans-memory/actions/workflows/test.yml"><img src="https://github.com/firasmpratama/beans-memory/actions/workflows/test.yml/badge.svg?branch=main" alt="Tes"></a>
+  <a href="https://github.com/firasmpratama/beans-memory/tags"><img src="https://img.shields.io/github/v/tag/firasmpratama/beans-memory" alt="Tag terbaru"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/firasmpratama/beans-memory" alt="Lisensi: MIT"></a>
+  <a href="https://github.com/firasmpratama/beans-memory/stargazers"><img src="https://img.shields.io/github/stars/firasmpratama/beans-memory" alt="GitHub stars"></a>
+  <img src="https://img.shields.io/github/last-commit/firasmpratama/beans-memory" alt="Commit terakhir">
+  <img src="https://img.shields.io/badge/Bun-%3E%3D1.2-000000?logo=bun&logoColor=white" alt="Bun 1.2+">
+  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey" alt="Platform">
+</p>
+
+<p align="center">
   <a href="README.md">English</a> | Bahasa Indonesia
 </p>
 
