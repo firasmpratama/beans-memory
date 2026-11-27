@@ -13,7 +13,7 @@
   <a href="https://github.com/firasmpratama/beans-memory/stargazers"><img src="https://img.shields.io/github/stars/firasmpratama/beans-memory" alt="GitHub stars"></a>
   <img src="https://img.shields.io/github/last-commit/firasmpratama/beans-memory" alt="Commit terakhir">
   <img src="https://img.shields.io/badge/Bun-%3E%3D1.2-000000?logo=bun&logoColor=white" alt="Bun 1.2+">
-  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey" alt="Platform">
+  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey" alt="Platform">
 </p>
 
 <p align="center">
@@ -21,6 +21,29 @@
 </p>
 
 Agent bisa menyimpan catatan saat bekerja, mencarinya lagi nanti, dan menerima index kecil di awal setiap sesi.
+
+## Install
+
+Butuh Bun 1.2+ (https://bun.sh). macOS, Linux, dan Windows didukung.
+
+Dari npm:
+
+```bash
+bun add -g beans-memory
+beans-memory install
+```
+
+`install` menulis loader plugin OpenCode, menyalin skill bersama untuk OpenCode dan Claude Code, lalu mengonfigurasi MCP untuk klien yang terdeteksi: Codex, Gemini CLI, dan Hermes. Restart OpenCode setelah instalasi pertama.
+
+Pilih target secara eksplisit kalau perlu:
+
+```bash
+beans-memory install --opencode --claude --codex --gemini --hermes
+beans-memory install --all
+beans-memory install --dry-run
+```
+
+Config yang sudah ada tidak pernah ditimpa sembarangan. Kalau config target sudah mendefinisikan `beans-memory` tanpa blok terkelola, installer membiarkannya dan menampilkan snippet untuk ditempel manual. Untuk menjalankan dari source, lihat Mulai cepat dari source di bawah.
 
 ## Cara kerja
 
@@ -42,16 +65,20 @@ OpenCode (runtime Bun)
 
 - OpenCode 2
 - Bun 1.2+ untuk CLI, server MCP, importer, dan test. Tidak perlu untuk plugin saja: plugin berjalan di Bun bawaan OpenCode.
-  - `curl -fsSL https://bun.sh/install | bash`
-- macOS atau Linux. Windows secara teori bisa, belum diuji.
+  - `curl -fsSL https://bun.sh/install | bash` di macOS/Linux, atau `powershell -c "irm bun.sh/install.ps1 | iex"` di Windows.
+- macOS, Linux, atau Windows.
 
-## Mulai cepat
+## Mulai cepat dari source
+
+Pakai ini kalau ingin menjalankan kode dari disk. Untuk instalasi biasa, pakai npm di atas.
 
 ```bash
 git clone https://github.com/firasmpratama/beans-memory ~/tools/beans-memory
 cd ~/tools/beans-memory
 ./install.sh
 ```
+
+`install.sh` berjalan di macOS dan Linux. Di Windows, jalankan `bun src/cli.ts install --opencode` dari repo.
 
 Restart OpenCode, lalu minta agent memanggil `memory_stats`. Di instalasi baru hasilnya nol catatan.
 
@@ -139,6 +166,12 @@ Dengan panduan di `AGENTS.md`, agent sebaiknya menulis catatan singkat: apa yang
 
 ## Server MCP (opsional)
 
+Setelah `bun add -g beans-memory`, server juga tersedia sebagai `beans-memory-mcp` di PATH. Untuk klien yang menerima array command:
+
+```jsonc
+{ "command": ["beans-memory-mcp"] }
+```
+
 Untuk klien yang tidak bisa memuat plugin:
 
 ```jsonc
@@ -175,10 +208,11 @@ Contoh Claude Desktop:
 
 ## CLI dan skill (opsional)
 
-Store yang sama bisa dipakai tanpa registrasi tool. Install CLI global dari npm:
+Store yang sama bisa dipakai tanpa registrasi tool. Install CLI global dari npm, lalu daftarkan plugin dan skill sekali:
 
 ```bash
 bun add -g beans-memory
+beans-memory install
 beans-memory stats
 ```
 
@@ -214,7 +248,7 @@ Kalau ingin skill sebagai satu-satunya jalur, set `MEMORY_TOOLS=off` sebelum Ope
 
 Server MCP bisa dipakai klien apa pun yang mendukung stdio MCP. Semua agent di mesin yang sama berbagi satu database, jadi catatan dari Claude Code terlihat di Codex, Gemini CLI, dan OpenCode.
 
-File siap pakai ada di `examples/`. Ganti `/ABSOLUTE/PATH/TO/` dengan path sebenarnya.
+`beans-memory install --all` menulis config ini otomatis kalau key belum ada atau blok terkelola sudah ada. File siap pakai di `examples/` untuk setup manual; ganti `/ABSOLUTE/PATH/TO/` dengan path sebenarnya.
 
 ### Claude Code
 
@@ -253,6 +287,8 @@ Lokasi default:
 ```
 ~/.local/share/beans-memory/memory.db
 ```
+
+Di Windows path yang sama menjadi `%USERPROFILE%\.local\share\beans-memory\memory.db`.
 
 Ubah dengan `MEMORY_DB=/path/ke/memory.db`. Semua project memakai satu file; kolom `project` yang memisahkan. Nama project diambil dari basename working directory, jadi `~/work/api` menjadi project `api`.
 
@@ -302,6 +338,7 @@ bun src/migrate-legacy-db.ts --from /lama/memory.db
 - Catatan disimpan apa adanya. Tidak ada redaksi rahasia pada catatan. Jangan simpan token, password, atau isi `.env` ke dalam catatan.
 - Prompt yang ditangkap otomatis diredaksi untuk pola rahasia umum: API key OpenAI/GitHub/AWS/Google, webhook Slack/Discord, dan pola `password=` / `token:`. Redaksi ini tidak lengkap, jadi tetap jangan menempelkan rahasia ke chat.
 - Database bisa dibaca proses apa pun yang berjalan sebagai user kamu. Perlakukan seperti file catatan, bukan vault.
+- Permission file diset `0600` di macOS dan Linux. Di Windows database mengikuti ACL profil user.
 - Laporkan kerentanan lewat [pelaporan privat GitHub](https://github.com/firasmpratama/beans-memory/security/advisories/new), bukan issue publik. Lihat [SECURITY.md](.github/SECURITY.md) untuk isi laporan.
 
 ## Troubleshooting
@@ -340,6 +377,7 @@ src/repo.ts                 query: sesi, prompt, observasi, pencarian
 src/plugin.ts               plugin OpenCode: hook dan tool
 src/mcp.ts                  server MCP stdio
 src/cli.ts                  CLI untuk pemakaian lewat skill
+src/install.ts              installer multi-agent: opencode, claude, codex, gemini, hermes
 src/time.ts                 format UTC ke waktu lokal
 src/redact.ts               redaksi rahasia untuk prompt yang ditangkap
 src/rehash.ts               migrasi hash sekali jalan

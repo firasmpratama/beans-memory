@@ -13,7 +13,7 @@
   <a href="https://github.com/firasmpratama/beans-memory/stargazers"><img src="https://img.shields.io/github/stars/firasmpratama/beans-memory" alt="GitHub stars"></a>
   <img src="https://img.shields.io/github/last-commit/firasmpratama/beans-memory" alt="Last commit">
   <img src="https://img.shields.io/badge/Bun-%3E%3D1.2-000000?logo=bun&logoColor=white" alt="Bun 1.2+">
-  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux-lightgrey" alt="Platforms">
+  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey" alt="Platforms">
 </p>
 
 <p align="center">
@@ -21,6 +21,29 @@
 </p>
 
 The agent can save notes while it works, search them later, and gets a small index injected at the start of each session.
+
+## Install
+
+Requires Bun 1.2+ (https://bun.sh). macOS, Linux, and Windows are supported.
+
+From npm:
+
+```bash
+bun add -g beans-memory
+beans-memory install
+```
+
+`install` writes the OpenCode plugin loader, copies the shared skill for OpenCode and Claude Code, and configures MCP for the clients it detects: Codex, Gemini CLI, and Hermes. Restart OpenCode after the first install.
+
+Pick targets explicitly when needed:
+
+```bash
+beans-memory install --opencode --claude --codex --gemini --hermes
+beans-memory install --all
+beans-memory install --dry-run
+```
+
+Existing configs are never replaced blindly. If a target config already defines `beans-memory` without the managed block, the installer leaves it untouched and prints the snippet to add by hand. To run from source instead, see Quick start from source below.
 
 ## How it works
 
@@ -42,16 +65,20 @@ OpenCode (Bun runtime)
 
 - OpenCode 2
 - Bun 1.2+ for the CLI, MCP server, importers, and tests. Not needed for the plugin alone: it runs inside OpenCode's bundled Bun.
-  - `curl -fsSL https://bun.sh/install | bash`
-- macOS or Linux. Windows works in theory but is untested.
+  - `curl -fsSL https://bun.sh/install | bash` on macOS/Linux, or `powershell -c "irm bun.sh/install.ps1 | iex"` on Windows.
+- macOS, Linux, or Windows.
 
-## Quick start
+## Quick start from source
+
+Use this when you want to run the code from disk. For a normal install, use npm above.
 
 ```bash
 git clone https://github.com/firasmpratama/beans-memory ~/tools/beans-memory
 cd ~/tools/beans-memory
 ./install.sh
 ```
+
+`install.sh` runs on macOS and Linux. On Windows, run `bun src/cli.ts install --opencode` from the repository instead.
 
 Then restart OpenCode and ask the agent to call `memory_stats`. On a fresh install it returns zero notes.
 
@@ -139,6 +166,12 @@ Guided by `AGENTS.md`, the agent should keep notes short: what changed, why, and
 
 ## MCP server (optional)
 
+After `bun add -g beans-memory`, the server is also available as `beans-memory-mcp` on PATH. For clients that accept a command array:
+
+```jsonc
+{ "command": ["beans-memory-mcp"] }
+```
+
 For clients that cannot load the plugin:
 
 ```jsonc
@@ -175,10 +208,11 @@ Claude Desktop example:
 
 ## CLI and skill (optional)
 
-The same store is available without any tool registration. Install the CLI globally from npm:
+The same store is available without any tool registration. Install the CLI globally from npm, then register the plugin and skill once:
 
 ```bash
 bun add -g beans-memory
+beans-memory install
 beans-memory stats
 ```
 
@@ -214,7 +248,7 @@ When the skill is the only path you want, set `MEMORY_TOOLS=off` before starting
 
 The MCP server works with any client that speaks stdio MCP. Every agent on the same machine shares one database, so a note saved from Claude Code is visible in Codex, Gemini CLI, and OpenCode.
 
-Ready-to-copy files live in `examples/`. Replace `/ABSOLUTE/PATH/TO/` with real paths first.
+`beans-memory install --all` writes these configs automatically when the key is absent or when the managed block exists. The ready-to-copy files in `examples/` are for manual setup; replace `/ABSOLUTE/PATH/TO/` with real paths first.
 
 ### Claude Code
 
@@ -253,6 +287,8 @@ Default location:
 ```
 ~/.local/share/beans-memory/memory.db
 ```
+
+On Windows the same path resolves to `%USERPROFILE%\.local\share\beans-memory\memory.db`.
 
 Override with `MEMORY_DB=/path/to/memory.db`. All projects share one file; the `project` column separates them. The project name comes from the basename of the working directory, so `~/work/api` is project `api`.
 
@@ -302,6 +338,7 @@ bun src/migrate-legacy-db.ts --from /old/memory.db
 - Notes are stored as written. There is no secret redaction for notes. Do not save tokens, passwords, or `.env` contents into a note.
 - Prompts captured automatically are redacted for common secret patterns: OpenAI/GitHub/AWS/Google API keys, Slack/Discord webhooks, and `password=` / `token:` style assignments. Redaction is best effort, not a guarantee, so still avoid pasting secrets into chat.
 - The database is readable by any process running as your user. Treat it like a notes file, not a vault.
+- File permissions are set to `0600` on macOS and Linux. On Windows the database inherits the ACL of the user profile.
 - Report vulnerabilities through [GitHub private vulnerability reporting](https://github.com/firasmpratama/beans-memory/security/advisories/new), not a public issue. See [SECURITY.md](.github/SECURITY.md) for what to include.
 
 ## Troubleshooting
@@ -340,6 +377,7 @@ src/repo.ts                 queries: sessions, prompts, observations, search
 src/plugin.ts               OpenCode plugin: hooks and tools
 src/mcp.ts                  MCP stdio server
 src/cli.ts                  CLI for skill-based use
+src/install.ts              multi-agent installer: opencode, claude, codex, gemini, hermes
 src/time.ts                 UTC to local formatting
 src/redact.ts               secret redaction for captured prompts
 src/rehash.ts               one-time hash migration
