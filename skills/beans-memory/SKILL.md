@@ -9,11 +9,7 @@ metadata:
 
 Memory lokal berbasis SQLite. Tidak ada cloud, tidak ada akun.
 
-CLI: `beans-memory` (launcher di `~/.local/bin/beans-memory`). Kalau launcher tidak tersedia, jalankan langsung:
-
-```bash
-bun "/Volumes/Beans Ext/projects/ai/beans-memory/src/cli.ts" <command>
-```
+CLI: `beans-memory`. Kalau perintah tidak tersedia, pakai `bunx beans-memory` (paket npm) atau `bun src/cli.ts` dari repo.
 
 ## Sebelum mulai
 

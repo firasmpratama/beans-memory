@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 import { basename } from "node:path";
 import { openDb, resolveDbPath } from "./db";
+import { install, TARGETS } from "./install";
 import {
   addObservation,
   getObservations,
@@ -60,6 +61,7 @@ function usage(): never {
       "  beans-memory recent [--limit=N] [--json]",
       "  beans-memory stats [--json]",
       "  beans-memory projects [--json]",
+      "  beans-memory install [--opencode] [--claude] [--codex] [--gemini] [--hermes] [--all] [--dry-run]",
       "",
       "Global: --db <path>, --project <name>",
       "Env: MEMORY_DB, MEMORY_PROJECT",
@@ -80,6 +82,24 @@ const { positional, flags } = parse(process.argv.slice(2));
 const command = positional.shift();
 
 if (!command) usage();
+
+if (command === "install") {
+  const selectedTargets = TARGETS.filter((target) => flags[target] === true);
+  const targets = flags.all === true ? [...TARGETS] : selectedTargets;
+  try {
+    const reports = install({
+      targets: targets.length > 0 ? targets : undefined,
+      dryRun: flags["dry-run"] === true,
+    });
+    for (const report of reports) {
+      console.log(`${report.target}: ${report.status} · ${report.detail}`);
+    }
+  } catch (error) {
+    console.error(error instanceof Error ? error.message : String(error));
+    process.exitCode = 1;
+  }
+  process.exit();
+}
 
 const dbPath = typeof flags.db === "string" ? flags.db : resolveDbPath();
 const project =

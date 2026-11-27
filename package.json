@@ -1,6 +1,6 @@
 {
   "name": "beans-memory",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Local persistent memory for OpenCode and other coding agents: SQLite + FTS5 plugin, MCP server, and CLI",
   "type": "module",
   "license": "MIT",
@@ -13,7 +13,8 @@
     "url": "https://github.com/firasmpratama/beans-memory/issues"
   },
   "bin": {
-    "beans-memory": "./src/cli.ts"
+    "beans-memory": "./src/cli.ts",
+    "beans-memory-mcp": "./src/mcp.ts"
   },
   "files": [
     "src",

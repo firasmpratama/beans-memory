@@ -1,4 +1,5 @@
-import { basename } from "node:path";
+#!/usr/bin/env bun
+import { basename, join } from "node:path";
 import { createInterface } from "node:readline";
 import { openDb, resolveDbPath } from "./db";
 import { localDate, localStamp } from "./time";
@@ -9,6 +10,11 @@ import {
   searchObservations,
   stats,
 } from "./repo";
+
+const packageJson = (await Bun.file(join(import.meta.dir, "..", "package.json")).json()) as {
+  version?: string;
+};
+const VERSION = packageJson.version ?? "0.0.0";
 
 const db = openDb(resolveDbPath());
 const project = process.env.MEMORY_PROJECT || basename(process.cwd());
@@ -179,7 +185,7 @@ rl.on("line", (line) => {
       reply(id, {
         protocolVersion,
         capabilities: { tools: {} },
-        serverInfo: { name: "beans-memory", version: "0.1.0" },
+        serverInfo: { name: "beans-memory", version: VERSION },
       });
       return;
     }

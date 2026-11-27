@@ -27,6 +27,8 @@ export function resolveDbPath(_directory: string = process.cwd(), home: string =
 
 function secure(path: string): void {
   if (path === ":memory:" || path.startsWith("file::memory:")) return;
+  // POSIX mode bits do not apply on Windows; ACLs are inherited from the user profile.
+  if (process.platform === "win32") return;
   try {
     chmodSync(path, 0o600);
   } catch (error) {
