@@ -8,6 +8,7 @@
 
 <p align="center">
   <a href="https://github.com/firasmpratama/beans-memory/tags"><img src="https://img.shields.io/github/v/tag/firasmpratama/beans-memory" alt="Latest tag"></a>
+  <a href="https://www.npmjs.com/package/beans-memory"><img src="https://img.shields.io/npm/v/beans-memory" alt="npm version"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/firasmpratama/beans-memory" alt="License: MIT"></a>
   <a href="https://github.com/firasmpratama/beans-memory/stargazers"><img src="https://img.shields.io/github/stars/firasmpratama/beans-memory" alt="GitHub stars"></a>
   <img src="https://img.shields.io/github/last-commit/firasmpratama/beans-memory" alt="Last commit">
@@ -174,7 +175,14 @@ Claude Desktop example:
 
 ## CLI and skill (optional)
 
-The same store is available without any tool registration:
+The same store is available without any tool registration. Install the CLI globally from npm:
+
+```bash
+bun add -g beans-memory
+beans-memory stats
+```
+
+Or run it from the repository:
 
 ```bash
 bun src/cli.ts search "query" --limit 5

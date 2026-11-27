@@ -8,6 +8,7 @@
 
 <p align="center">
   <a href="https://github.com/firasmpratama/beans-memory/tags"><img src="https://img.shields.io/github/v/tag/firasmpratama/beans-memory" alt="Tag terbaru"></a>
+  <a href="https://www.npmjs.com/package/beans-memory"><img src="https://img.shields.io/npm/v/beans-memory" alt="Versi npm"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/firasmpratama/beans-memory" alt="Lisensi: MIT"></a>
   <a href="https://github.com/firasmpratama/beans-memory/stargazers"><img src="https://img.shields.io/github/stars/firasmpratama/beans-memory" alt="GitHub stars"></a>
   <img src="https://img.shields.io/github/last-commit/firasmpratama/beans-memory" alt="Commit terakhir">
@@ -174,7 +175,14 @@ Contoh Claude Desktop:
 
 ## CLI dan skill (opsional)
 
-Store yang sama bisa dipakai tanpa registrasi tool:
+Store yang sama bisa dipakai tanpa registrasi tool. Install CLI global dari npm:
+
+```bash
+bun add -g beans-memory
+beans-memory stats
+```
+
+Atau jalankan langsung dari repo:
 
 ```bash
 bun src/cli.ts search "query" --limit 5
