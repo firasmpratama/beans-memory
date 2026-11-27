@@ -7,7 +7,6 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/firasmpratama/beans-memory/actions/workflows/test.yml"><img src="https://github.com/firasmpratama/beans-memory/actions/workflows/test.yml/badge.svg?branch=main" alt="Tes"></a>
   <a href="https://github.com/firasmpratama/beans-memory/tags"><img src="https://img.shields.io/github/v/tag/firasmpratama/beans-memory" alt="Tag terbaru"></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/firasmpratama/beans-memory" alt="Lisensi: MIT"></a>
   <a href="https://github.com/firasmpratama/beans-memory/stargazers"><img src="https://img.shields.io/github/stars/firasmpratama/beans-memory" alt="GitHub stars"></a>
