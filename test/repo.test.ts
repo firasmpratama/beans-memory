@@ -37,7 +37,7 @@ describe("memory store", () => {
 
     const rows = searchObservations(db, { project, query: "revoked_key_at" });
     expect(rows.length).toBe(1);
-    expect(rows[0].id).toBe(result.id);
+    expect(rows[0]?.id).toBe(result.id);
   });
 
   test("deduplicates identical observations", () => {
@@ -56,13 +56,13 @@ describe("memory store", () => {
     });
     const rows = getObservations(db, [result.id]);
     expect(rows.length).toBe(1);
-    expect(rows[0].body).toContain("requester_notes");
+    expect(rows[0]?.body).toContain("requester_notes");
   });
 
   test("recent observations are ordered newest first", () => {
     addObservation(db, { project, title: "Terbaru", body: "x", createdAt: "2099-01-01T00:00:00Z" });
     const rows = recentObservations(db, project, 1);
-    expect(rows[0].title).toBe("Terbaru");
+    expect(rows[0]?.title).toBe("Terbaru");
   });
 
   test("stores prompts and counts sessions", () => {

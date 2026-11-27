@@ -70,7 +70,7 @@ describe("observation query edge cases", () => {
     const rows = searchObservations(db, { project, query: "", limit: 1 });
 
     expect(rows).toHaveLength(1);
-    expect(rows[0].id).toBe(newest.id);
+    expect(rows[0]?.id).toBe(newest.id);
   });
 
   test("requires all query tokens when the AND search finds matches", () => {
