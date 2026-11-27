@@ -9,6 +9,7 @@
 <p align="center">
   <a href="https://github.com/firasmpratama/beans-memory/tags"><img src="https://img.shields.io/github/v/tag/firasmpratama/beans-memory" alt="Tag terbaru"></a>
   <a href="https://www.npmjs.com/package/beans-memory"><img src="https://img.shields.io/npm/v/beans-memory" alt="Versi npm"></a>
+  <img src="https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/firasmpratama/beans-memory/main/coverage.json" alt="coverage">
   <a href="LICENSE"><img src="https://img.shields.io/github/license/firasmpratama/beans-memory" alt="Lisensi: MIT"></a>
   <a href="https://github.com/firasmpratama/beans-memory/stargazers"><img src="https://img.shields.io/github/stars/firasmpratama/beans-memory" alt="GitHub stars"></a>
   <img src="https://img.shields.io/github/last-commit/firasmpratama/beans-memory" alt="Commit terakhir">
@@ -367,7 +368,10 @@ bun install
 bun test
 bun run typecheck
 bun run test:coverage
+bun run coverage:badge
 ```
+
+`coverage:badge` membuat ulang `coverage.json`, sumber badge coverage. Commit file itu saat angkanya berubah.
 
 ## Struktur
 

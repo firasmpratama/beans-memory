@@ -39,6 +39,7 @@
   "scripts": {
     "test": "bun test",
     "test:coverage": "bun test --coverage",
+    "coverage:badge": "bun test --coverage --coverage-reporter=lcov && bun scripts/coverage-badge.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
