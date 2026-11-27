@@ -10,7 +10,7 @@ export type ObservationInput = {
   body?: string;
   files?: string[];
   concepts?: string[];
-  source?: "agent" | "capture" | "import";
+  source?: "agent" | "capture" | "import" | "import_summary";
   createdAt?: string;
 };
 

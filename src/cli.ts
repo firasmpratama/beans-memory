@@ -20,16 +20,20 @@ function parse(argv: string[]): Parsed {
   const flags: Record<string, string | boolean> = {};
   for (let index = 0; index < argv.length; index += 1) {
     const token = argv[index];
+    if (token === undefined) {
+      continue;
+    }
     if (!token.startsWith("--")) {
       positional.push(token);
       continue;
     }
     const [rawKey, inline] = token.slice(2).split("=", 2);
-    const key = rawKey.trim();
+    const key = (rawKey ?? "").trim();
+    const next = argv[index + 1];
     if (inline !== undefined) {
       flags[key] = inline;
-    } else if (index + 1 < argv.length && !argv[index + 1].startsWith("--")) {
-      flags[key] = argv[index + 1];
+    } else if (next !== undefined && !next.startsWith("--")) {
+      flags[key] = next;
       index += 1;
     } else {
       flags[key] = true;

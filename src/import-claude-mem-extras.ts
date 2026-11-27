@@ -7,7 +7,8 @@ import { addObservation, stats } from "./repo";
 const args = process.argv.slice(2);
 function arg(name: string, fallback: string): string {
   const index = args.indexOf(`--${name}`);
-  return index >= 0 && args[index + 1] ? args[index + 1] : fallback;
+  const value = args[index + 1];
+  return index >= 0 && value ? value : fallback;
 }
 
 const sourcePath = arg("source", join(homedir(), ".claude-mem", "claude-mem.db"));
